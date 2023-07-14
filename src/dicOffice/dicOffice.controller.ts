@@ -1,4 +1,4 @@
 import { Controller } from '@nestjs/common';
 
-@Controller('dic-office')
+@Controller('dicOffice')
 export class DicOfficeController {}

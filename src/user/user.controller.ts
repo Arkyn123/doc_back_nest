@@ -1,10 +1,8 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-// import { PermissionsGuard } from '../filteringAndMiddleware/guards';
 import { UserService } from './user.service';
 import { Request } from 'express';
 
-@Controller('users')
-// @UseGuards(PermissionsGuard)
+@Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

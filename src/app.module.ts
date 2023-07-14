@@ -31,8 +31,6 @@ import { DocumentStatusModule } from './documentStatus/documentStatus.module';
 import { DocumentRouteModule } from './documentRoute/documentRoute.module';
 import { DocumentRoute } from './documentRoute/documentRoute.model';
 
-import { DocumentOrderLogModule } from './documentOrderLog/DocumentOrderLog.module';
-
 import { DicOfficeModule } from './dicOffice/dicOffice.module';
 import { DicOffice } from './dicOffice/dicOffice.model';
 
@@ -81,7 +79,6 @@ import { SequelizeFiltering } from './middleware/SequelizeFilteringMiddleware';
     DocumentTypeModule,
     DocumentStatusModule,
     DocumentRouteModule,
-    DocumentOrderLogModule,
     DicOfficeModule,
     DicOfficeCorrespondenceModule,
   ],

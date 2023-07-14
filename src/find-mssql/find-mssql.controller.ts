@@ -1,4 +1,4 @@
 import { Controller } from '@nestjs/common';
 
-@Controller('find-mssql')
+@Controller('findMSSQL')
 export class FindMssqlController {}

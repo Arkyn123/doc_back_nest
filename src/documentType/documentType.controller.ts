@@ -1,4 +1,4 @@
 import { Controller } from '@nestjs/common';
 
-@Controller('document-type')
+@Controller('documentType')
 export class DocumentTypeController {}
