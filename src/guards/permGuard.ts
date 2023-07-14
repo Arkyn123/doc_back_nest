@@ -2,6 +2,7 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Request, Response } from 'express';
 import { Document } from '../document/document.model';
+import errors from 'src/utils/errors';
 
 @Injectable()
 export class PermGuard implements CanActivate {
@@ -20,6 +21,10 @@ export class PermGuard implements CanActivate {
         include: [{ all: true, nested: true, duplicating: true }],
       });
     })();
+    if (!object) {
+      res.sendStatus(errors.notFound.code);
+      return false;
+    }
 
     if (req['permissions'].authenticated) {
       if (!req['permissions'].roleWanted && !req['permissions'].fieldWanted) {
