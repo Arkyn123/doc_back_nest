@@ -1,22 +1,25 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { Document } from '../document/document.model';
 
 @Injectable()
-export class ownerOrHasPermissions implements NestMiddleware {
+export class PermGuard implements CanActivate {
   constructor(
     @InjectModel(Document)
     private readonly documentRepository: typeof Document,
   ) {}
 
-  async use(req: Request) {
-    const object = await this.documentRepository.findByPk(
-      req.params.documentId,
-      {
+  canActivate(context: ExecutionContext): boolean {
+    const req = context.switchToHttp().getRequest<Request>();
+    const res = context.switchToHttp().getResponse<Response>();
+    let object;
+
+    (async () => {
+      object = await this.documentRepository.findByPk(req.params.documentId, {
         include: [{ all: true, nested: true, duplicating: true }],
-      },
-    );
+      });
+    })();
 
     if (req['permissions'].authenticated) {
       if (!req['permissions'].roleWanted && !req['permissions'].fieldWanted) {

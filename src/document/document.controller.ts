@@ -15,6 +15,10 @@ import { DocumentService } from './document.service';
 import { DocumentDTO } from './dto/DocumentDTO';
 import { UpdateDocumentDTO } from './dto/updateDocumentDTO';
 
+import { MyGuard } from '../guards/guard';
+import { PermGuard } from '../guards/permGuard';
+
+@UseGuards(MyGuard)
 @Controller('document')
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
@@ -39,17 +43,18 @@ export class DocumentController {
     return this.documentService.addNewDocumentInDraft(documentDTO);
   }
 
+  @UseGuards(PermGuard)
   @Put('/update/:documentId')
-  updateDocumentInfoForRole(
+  updateDocumentByDocumentId(
     @Param('documentId') documentId: string,
     @Body() updateDocumentDTO: UpdateDocumentDTO,
   ) {
-    return this.documentService.updateDocumentInfoForRole(
+    return this.documentService.updateDocumentByDocumentId(
       documentId,
       updateDocumentDTO,
     );
   }
-
+  @UseGuards(PermGuard)
   @Put('/updateFromDraftAndRevision/:documentId')
   updateDocumentFromDraftAndRevisionByDocumentId(
     @Param('documentId') documentId: string,
@@ -59,6 +64,7 @@ export class DocumentController {
     );
   }
 
+  @UseGuards(PermGuard)
   @Put('/updateInfoForRole/:documentId')
   updateInfoForRole(
     @Param('documentId') documentId: string,
@@ -70,6 +76,7 @@ export class DocumentController {
     );
   }
 
+  @UseGuards(PermGuard)
   @Put('/updateDocumentFlagDeleted/:documentId')
   updateDocumentFlagDeleted(@Param('documentId') documentId: string) {
     return this.documentService.updateDocumentFlagDeleted(documentId);

@@ -41,32 +41,48 @@ export class setRolesToRequest implements NestMiddleware {
             );
 
             const userDataFromGraphQL = (await response.json()).data;
-            const roles = userDataFromGraphQL.Workers[0].permissions;
+            let roles = userDataFromGraphQL.Workers[0].permissions;
             const office = userDataFromGraphQL.Workers[0].positions[0].office;
 
-            const trollUsers = [184184];
+            const adminUser = [184184];
+
             if (roles.some((role) => role.idAccessCode == 'UEMI_ADMIN')) {
               roles.push({
                 idAccessCode: 'SDM_SECRETARY_CHECK',
                 idOffice: null,
               });
+
               roles.push({ idAccessCode: 'SDM_LABOR_CHECK', idOffice: null });
+
               roles.push({
                 idAccessCode: 'SDM_SECRETARY_REGISTRATION',
                 idOffice: null,
               });
+
               roles.push({
                 idAccessCode: 'SDM_LABOR_REGISTRATION',
                 idOffice: null,
               });
             }
-            if (trollUsers.includes(req['user'].id)) {
+
+            if (adminUser.includes(req['user'].id)) {
               roles.push({ idAccessCode: 'admin', idOffice: null });
             }
+
+            roles = roles.filter(
+              (obj, index, self) =>
+                index ===
+                self.findIndex(
+                  (o) =>
+                    o.idAccessCode === obj.idAccessCode &&
+                    o.idOffice === obj.idOffice,
+                ),
+            );
+
             req['user'].roles = roles;
             req['user'].officeId = office.id;
             req['user'].officeName = office.name;
-
+            // ===> CheckPermissions
             next();
           } catch (error) {
             return res.sendStatus(errors.badRequest.code);

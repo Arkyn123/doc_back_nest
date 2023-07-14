@@ -1,4 +1,4 @@
-import { Injectable, NestMiddleware, Req } from '@nestjs/common';
+import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { config } from 'src/utils/config';
 import errors from 'src/utils/errors';
@@ -43,6 +43,7 @@ export class setUserToRequest implements NestMiddleware {
             };
             req['user'] = user;
             req['token'] = req.headers.authorization.split(' ')[1];
+            // ===> SetRolesToRequest
             next();
           } catch (error) {
             return res.sendStatus(errors.badRequest.code);

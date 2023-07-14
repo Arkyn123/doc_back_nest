@@ -163,6 +163,13 @@ export class DocumentService {
     throw new Error('Method not implemented.');
   }
 
+  updateDocumentByDocumentId(
+    documentId: string,
+    updateDocumentDTO: UpdateDocumentDTO,
+  ) {
+    throw new Error('Method not implemented.');
+  }
+
   updateDocumentInfoForRole(
     documentId: string,
     updateDocumentDTO: UpdateDocumentDTO,
