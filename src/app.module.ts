@@ -40,10 +40,7 @@ import { DicOfficeCorrespondence } from './dicOfficeCorrespondence/dicOfficeCorr
 import { T_XXHR_SCHEDULE_BRIGADES } from './T_XXHR_SCHEDULE_BRIGADES/T_XXHR_SCHEDULE_BRIGADES.model';
 
 import { CheckConnectionWithDB } from './middleware/CheckConnectionWithDbMiddleware';
-import { setWantedPermission } from './middleware/SetWantedPermissionMiddleware';
-import { setUserToRequest } from './middleware/SetUserToRequestMiddleware';
-import { setRolesToRequest } from './middleware/SetRolesToRequestMiddleware';
-import { checkPermissions } from './middleware/CheckPermissionsMiddleware';
+import { setPermissions } from './middleware/SetPermissions';
 import { SequelizeFiltering } from './middleware/SequelizeFilteringMiddleware';
 
 @Module({
@@ -88,14 +85,10 @@ import { SequelizeFiltering } from './middleware/SequelizeFilteringMiddleware';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply(
-        CheckConnectionWithDB,
-        setWantedPermission,
-        setUserToRequest,
-        setRolesToRequest,
-        checkPermissions,
-        SequelizeFiltering,
-      )
+      .apply(setPermissions)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+    consumer
+      .apply(setPermissions, SequelizeFiltering)
       .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

@@ -21,7 +21,11 @@ export class CheckConnectionWithDB implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     try {
       await this.sequelize.authenticate();
-      console.log('Success connection to database');
+      console.log(
+        `DB connected\t${config[process.env.NODE_ENV].database.dialect}://${
+          config[process.env.NODE_ENV].database.host
+        }:${config[process.env.NODE_ENV].database.port}`,
+      );
     } catch (err) {
       console.log('Server cannot connect to database');
     }

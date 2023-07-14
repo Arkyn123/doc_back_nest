@@ -10,7 +10,7 @@ export class PermGuard implements CanActivate {
     @InjectModel(Document)
     private readonly documentRepository: typeof Document,
   ) {}
-
+  //OwnerOrHasPermissions
   canActivate(context: ExecutionContext): boolean {
     const req = context.switchToHttp().getRequest<Request>();
     const res = context.switchToHttp().getResponse<Response>();
@@ -21,6 +21,7 @@ export class PermGuard implements CanActivate {
         include: [{ all: true, nested: true, duplicating: true }],
       });
     })();
+
     if (!object) {
       res.sendStatus(errors.notFound.code);
       return false;
