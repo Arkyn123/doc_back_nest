@@ -38,5 +38,4 @@ export class DocumentRoute extends Model<DocumentRoute> {
   // @ForeignKey(() => DocumentType)
   // @Column
   // documentTypeId: number;
-
 }
