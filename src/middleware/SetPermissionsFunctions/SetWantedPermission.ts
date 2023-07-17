@@ -16,9 +16,7 @@ export default async function setWantedPermission(req) {
 
   const routerPath = [
     config[process.env.NODE_ENV].server.urlPrefix,
-    ...url
-      .split('/')
-      .filter((item) => item !== '' && isNaN(item)),
+    ...url.split('/').filter((item) => item !== '' && isNaN(item)),
   ];
 
   // const routerPath = [
@@ -36,6 +34,8 @@ export default async function setWantedPermission(req) {
     const regex = new RegExp(`/${item}`, 'g');
     path = path.replace(regex, '');
   });
+
+  if (path == '') path = '/';
   console.log(routerPath, path);
 
   const routerPermissions = getRouterPermissions(routerPath)[path];

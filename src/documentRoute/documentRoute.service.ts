@@ -27,7 +27,7 @@ export class DocumentRouteService {
     try {
       const documentRoutes = await this.documentRouteRepository.findAll({
         where: {
-          documentTypeId: req.params.documentTypeId,
+          documentType: req.params.documentTypeId,
         },
         include: [{ all: true, nested: true, duplicating: true }],
       });
