@@ -3,7 +3,7 @@ export const config = {
     database: {
       username: 'postgres',
       password: 'root',
-      database: 'documents',
+      database: 'docs_dump',
       host: 'localhost',
       port: 5432,
       dialect: 'postgres',

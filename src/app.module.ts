@@ -6,6 +6,10 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
+import {
+  setPermissionsPaths,
+  setPermissionsPathsPlusSequelizeFiltering,
+} from './utils/paths';
 
 import { UserModule } from './user/user.module';
 
@@ -84,11 +88,9 @@ import { SequelizeFiltering } from './middleware/SequelizeFilteringMiddleware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(setPermissions)
-      .forRoutes({ path: '*', method: RequestMethod.ALL });
+    consumer.apply(setPermissions).forRoutes(...setPermissionsPaths);
     consumer
       .apply(setPermissions, SequelizeFiltering)
-      .forRoutes({ path: '*', method: RequestMethod.ALL });
+      .forRoutes(...setPermissionsPathsPlusSequelizeFiltering);
   }
 }

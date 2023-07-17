@@ -5,6 +5,7 @@ import {
   DataType,
   BelongsTo,
   HasMany,
+  ForeignKey,
 } from 'sequelize-typescript';
 import { DocumentStatus } from '../documentStatus/documentStatus.model';
 import { DocumentOrderLog } from '../documentOrderLog/DocumentOrderLog.model';
@@ -85,12 +86,20 @@ export class Document extends Model<Document> {
   @Column({ type: DataType.INTEGER, allowNull: false })
   officeId: number;
 
+  @ForeignKey(() => DocumentStatus)
+  @Column
+  statusId: number;
+
   @BelongsTo(() => DocumentStatus, {
+    as: 'status',
     foreignKey: 'statusId',
-    as: 'documentStatus',
   })
   status: DocumentStatus;
 
-  @HasMany(() => DocumentOrderLog, 'documentId')
+  @HasMany(() => DocumentOrderLog, {
+    onDelete: 'CASCADE',
+    foreignKey: 'documentId',
+    as: 'documentOrderLog',
+  })
   documentOrderLog: DocumentOrderLog;
 }

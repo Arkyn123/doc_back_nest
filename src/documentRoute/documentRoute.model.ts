@@ -1,4 +1,11 @@
-import { Column, Model, Table, DataType } from 'sequelize-typescript';
+import {
+  Column,
+  Model,
+  Table,
+  DataType,
+  ForeignKey,
+} from 'sequelize-typescript';
+import { DocumentType } from '../documentType/documentType.model';
 
 @Table({ tableName: 'DocumentRoute', freezeTableName: true })
 export class DocumentRoute extends Model<DocumentRoute> {
@@ -27,4 +34,9 @@ export class DocumentRoute extends Model<DocumentRoute> {
 
   @Column({ type: DataType.STRING(256), allowNull: false })
   documentType: string;
+
+  // @ForeignKey(() => DocumentType)
+  // @Column
+  // documentTypeId: number;
+
 }

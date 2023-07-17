@@ -5,9 +5,13 @@ import { Document } from './document.model';
 import { DocumentDTO } from './dto/DocumentDTO';
 import { UpdateDocumentDTO } from './dto/updateDocumentDTO';
 
-import { Op } from 'sequelize';
+import { Op, ValidationError } from 'sequelize';
 import errors from 'src/utils/errors';
 import fetch from 'node-fetch';
+
+import { DocumentRoute } from 'src/documentRoute/documentRoute.model';
+import { DocumentType } from 'src/documentType/documentType.model';
+import { DocumentOrderLog } from 'src/documentOrderLog/DocumentOrderLog.model';
 
 @Injectable()
 export class DocumentService {
@@ -151,41 +155,354 @@ export class DocumentService {
     }
   }
 
-  getDocumentById(documentId: string) {
-    return `getDocumentById${documentId}`;
+  async getDocumentById(req, res) {
+    try {
+      const document = await Document.findByPk(req.params.documentId, {
+        include: [{ all: true, nested: true, duplicating: true }],
+      });
+
+      const route = await DocumentRoute.findOne({
+        where: {
+          orderId: document.dataValues.order,
+          documentType: document.dataValues.documentType,
+        },
+        include: [{ all: true, nested: true, duplicating: true }],
+      });
+
+      return res.status(errors.success.code).json({ document, route });
+    } catch (e) {
+      console.log(e.message);
+
+      return res.sendStatus(errors.internalServerError.code);
+    }
   }
 
-  addNewDocument(DocumentDTO: DocumentDTO) {
-    throw new Error('Method not implemented.');
+  async addNewDocument(req, res) {
+    try {
+      const route = await DocumentRoute.findOne({
+        where: {
+          orderId: 1,
+          documentType: req.body.documentType,
+        },
+      });
+      if (!route) {
+        return res.sendStatus(errors.notFound.code);
+      }
+      const type = await DocumentType.findOne({
+        where: {
+          id: req.body.documentType,
+        },
+      });
+      if (!type) {
+        return res.sendStatus(errors.notFound.code);
+      }
+      const document = await Document.create({
+        body: req.body.body,
+        documentType: type.dataValues.id,
+        documentTypeDescription: type.dataValues.description,
+        authorPersonalNumber: req.user.id,
+        authorFullname: req.user.fullname,
+        dateApplication: req.body.dateApplication,
+        statusId: 3,
+        order: 1,
+        permitionCurrent: route.dataValues.permition,
+        permitionCurrentDesc: route.dataValues.description,
+        documentTemplateID: req.body.documentTemplateID,
+        users: req.body.users,
+        usernames: req.body.users.map((u) => u.fullname).join(),
+        officeName: req.body.officeName,
+      });
+      return res.status(errors.success.code).json(document.dataValues);
+    } catch (e) {
+      console.log(e);
+      if (e instanceof ValidationError) {
+        return res.sendStatus(errors.badRequest.code);
+      }
+      return res.sendStatus(errors.internalServerError.code);
+    }
   }
 
-  addNewDocumentInDraft(DocumentDTO: DocumentDTO) {
-    throw new Error('Method not implemented.');
+  async addNewDocumentInDraft(req, res) {
+    try {
+      const route = await DocumentRoute.findOne({
+        where: {
+          orderId: 1,
+          documentType: req.body.documentType,
+        },
+      });
+      if (!route) {
+        return res.sendStatus(errors.notFound.code);
+      }
+      const type = await DocumentType.findOne({
+        where: {
+          id: req.body.documentType,
+        },
+      });
+      if (!type) {
+        return res.sendStatus(errors.notFound.code);
+      }
+      const document = await Document.create({
+        body: req.body.body,
+        documentType: type.dataValues.id,
+        documentTypeDescription: type.dataValues.description,
+        authorPersonalNumber: req.user.id,
+        authorFullname: req.user.fullname,
+        dateApplication: req.body.dateApplication,
+        statusId: 1,
+        order: 1,
+        permitionCurrent: route.dataValues.permition,
+        permitionCurrentDesc: route.dataValues.description,
+        documentTemplateID: req.body.documentTemplateID,
+        users: req.body.users,
+        usernames: req.body.users
+          ? req.body.users.map((u) => u.fullname).join(' ')
+          : '',
+        officeName: req.body.officeName,
+        officeId: req.body.officeId,
+      });
+      const routeNext = await DocumentRoute.findOne({
+        where: {
+          orderId: 1,
+          documentType: document.dataValues.documentType,
+        },
+      });
+      await DocumentOrderLog.create({
+        documentId: document.dataValues.id,
+        order: document.dataValues.order,
+        orderDescription: routeNext.dataValues.description,
+        statusDescription: 'Черновик',
+        personalNumber: req.user.id,
+        fullname: req.user.fullname,
+      });
+      return res.status(errors.success.code).json(document.dataValues);
+    } catch (e) {
+      console.log(e);
+      if (e instanceof ValidationError) {
+        return res.sendStatus(errors.badRequest.code);
+      }
+      return res.sendStatus(errors.internalServerError.code);
+    }
   }
 
-  updateDocumentByDocumentId(
-    documentId: string,
-    updateDocumentDTO: UpdateDocumentDTO,
-  ) {
-    throw new Error('Method not implemented.');
+  async updateDocumentByDocumentId(req, res) {
+    try {
+      const document = await Document.findByPk(req.params.documentId, {
+        include: [{ all: true, nested: true, duplicating: true }],
+      });
+
+      const route = await DocumentRoute.findOne({
+        where: {
+          orderId: document.dataValues.order,
+          documentType: document.dataValues.documentType,
+        },
+        include: [{ all: true, nested: true, duplicating: true }],
+      });
+
+      if (!route) {
+        return res.sendStatus(errors.forbidden.code);
+      }
+      if (
+        req.roles
+          .map((r) => r.idAccessCode)
+          .includes(route.dataValues.permition)
+      ) {
+        if (document.dataValues.statusId == 3 && req.body.agree) {
+          if (document.dataValues.order == 3) {
+            await document.update({
+              registrationNumber: req.body.registrationNumber,
+            });
+          }
+          if (document.dataValues.order < 4) {
+            const orderNext = document.dataValues.order + 1;
+            var routeNext = await DocumentRoute.findOne({
+              where: {
+                orderId: orderNext,
+                documentType: document.dataValues.documentType,
+              },
+            });
+            if (!route) {
+              return res.sendStatus(errors.notFound.code);
+            }
+            await document.update({
+              order: orderNext,
+              permitionCurrent: routeNext.dataValues.permition,
+              permitionCurrentDesc: routeNext.dataValues.description,
+            });
+          } else {
+            await document.increment('statusId', { by: 1 });
+            var routeNext = await DocumentRoute.findOne({
+              where: {
+                orderId: 4,
+                documentType: document.dataValues.documentType,
+              },
+            });
+          }
+        } else if (document.dataValues.statusId == 3 && !req.body.agree) {
+          var routeNext = await DocumentRoute.findOne({
+            where: {
+              orderId: 1,
+              documentType: document.dataValues.documentType,
+            },
+          });
+          if (!route) {
+            return res.sendStatus(errors.notFound.code);
+          }
+          await document.update({
+            statusId: 2,
+            order: 1,
+            permitionCurrent: routeNext.dataValues.permition,
+            permitionCurrentDesc: routeNext.dataValues.description,
+            message: req.body.message,
+            messageUserId: req.user.id,
+            messageUserFullname: req.user.fullname,
+          });
+        }
+        //для обновления статуса
+        const documentNew = await Document.findByPk(req.params.documentId, {
+          include: [{ all: true, nested: true, duplicating: true }],
+        });
+        await DocumentOrderLog.create({
+          documentId: documentNew.dataValues.id,
+          order: documentNew.dataValues.order,
+          orderDescription: routeNext.dataValues.description,
+          statusDescription:
+            documentNew.dataValues.status.dataValues.description,
+          personalNumber: req.user.id,
+          fullname: req.user.fullname,
+          message: req.body.message,
+          registrationNumber: req.body.registrationNumber,
+        });
+        return res.status(errors.success.code).json(document);
+      }
+      return res.sendStatus(errors.forbidden.code);
+    } catch (e) {
+      console.log(e);
+      return res.sendStatus(errors.internalServerError.code);
+    }
   }
 
-  updateDocumentInfoForRole(
-    documentId: string,
-    updateDocumentDTO: UpdateDocumentDTO,
-  ) {
-    throw new Error('Method not implemented.');
+  async updateDocumentInfoForRole(req, res, next) {
+    try {
+      const document = await Document.findByPk(req.params.documentId, {
+        include: [{ all: true, nested: true, duplicating: true }],
+      });
+
+      await document.update({
+        dateApplication: req.body.dateApplication,
+        body: req.body.updatedDocument,
+        users: req.body.users,
+        officeName: req.body.officeName,
+        officeId: req.body.officeId,
+      });
+      return next();
+    } catch (e) {
+      console.log(e);
+      return res.sendStatus(errors.internalServerError.code);
+    }
   }
 
-  updateDocumentFromDraftAndRevisionByDocumentId(documentId: string) {
-    throw new Error('Method not implemented.');
+  async updateDocumentFromDraftAndRevisionByDocumentId(req, res) {
+    try {
+      const document = await Document.findByPk(req.params.documentId, {
+        include: [{ all: true, nested: true, duplicating: true }],
+      });
+      if (!document) {
+        return res.sendStatus(errors.notFound.code);
+      }
+      const route = await DocumentRoute.findOne({
+        where: {
+          orderId: 1,
+          documentType: req.body.documentType,
+        },
+      });
+      if (!route) {
+        return res.sendStatus(errors.notFound.code);
+      }
+      if (
+        req.user.id == document.dataValues.authorPersonalNumber &&
+        !req.body.flagUpdateDraft
+      ) {
+        await document.update({
+          body: req.body.updatedDocument,
+          statusId: 3,
+          order: 1,
+          permitionCurrent: route.dataValues.permition,
+          permitionCurrentDesc: route.dataValues.description,
+          dateApplication: req.body.dateApplication,
+          documentTemplateID: req.body.documentTemplateID,
+          users: req.body.users,
+          officeName: req.body.officeName,
+          officeId: req.body.officeId,
+          documentType: req.body.documentType,
+        });
+        const documentUpdated = await Document.findByPk(req.params.documentId, {
+          include: [{ all: true, nested: true, duplicating: true }],
+        });
+        const routeNext = await DocumentRoute.findOne({
+          where: {
+            orderId: 1,
+            documentType: document.dataValues.documentType,
+          },
+        });
+        await DocumentOrderLog.create({
+          documentId: documentUpdated.dataValues.id,
+          order: documentUpdated.dataValues.order,
+          orderDescription: routeNext.dataValues.description,
+          statusDescription:
+            documentUpdated.dataValues.status.dataValues.description,
+          personalNumber: req.user.id,
+          fullname: req.user.fullname,
+        });
+      }
+      if (req.body.flagUpdateDraft) {
+        await document.update({
+          body: req.body.updatedDocument,
+          permitionCurrent: route.dataValues.permition,
+          permitionCurrentDesc: route.dataValues.description,
+          dateApplication: req.body.dateApplication,
+          documentTemplateID: req.body.documentTemplateID,
+          users: req.body.users,
+          officeName: req.body.officeName,
+          officeId: req.body.officeId,
+          documentType: req.body.documentType,
+        });
+      }
+      return res.status(errors.success.code).json(document);
+    } catch (e) {
+      console.log(e);
+      return res.sendStatus(errors.internalServerError.code);
+    }
   }
 
-  updateDocumentFlagDeleted(documentId: string) {
-    throw new Error('Method not implemented.');
+  async updateDocumentFlagDeleted(req, res) {
+    try {
+      const document = await Document.findByPk(req.params.documentId, {
+        include: [{ all: true, nested: true, duplicating: true }],
+      });
+      if (!document) {
+        return res.sendStatus(errors.notFound.code);
+      }
+      await document.update({
+        dateApplication: req.body.dateApplication,
+        deletedDate: new Date(Date.now()),
+        flagDeleted: true,
+        deletedAuthorFullname: req.body.deletedAuthorFullname,
+        deletedAuthorPersonalNumber: req.body.deletedAuthorPersonalNumber,
+      });
+      return res.status(errors.success.code).json(document);
+    } catch (e) {
+      return res.sendStatus(errors.internalServerError.code);
+    }
   }
 
-  deleteAllDocuments() {
-    throw new Error('Method not implemented.');
+  async deleteAllDocuments(res) {
+    try {
+      Document.destroy({
+        where: {},
+      });
+      return res.status(errors.success.code).json('delete all');
+    } catch (e) {
+      return res.sendStatus(errors.internalServerError.code);
+    }
   }
 }

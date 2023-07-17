@@ -25,6 +25,6 @@ export class DocumentDTO {
   deletedAuthorFullname: string;
   deletedAuthorPersonalNumber: number;
   officeId: number;
-  documentStatus: DocumentStatusDTO;
+  statusId: number;
   documentOrderLog: DocumentOrderLogDTO;
 }

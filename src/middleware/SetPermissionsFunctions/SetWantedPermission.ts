@@ -10,13 +10,33 @@ const getRouterPermissions = (path) => {
 };
 
 export default async function setWantedPermission(req) {
+  let url = req['originalUrl'];
+  let parts = url.split('/');
+  url = parts.slice(0, 2).join('/');
+
   const routerPath = [
     config[process.env.NODE_ENV].server.urlPrefix,
-    ...req['originalUrl'].split('/').filter((item) => item !== ''),
+    ...url
+      .split('/')
+      .filter((item) => item !== '' && isNaN(item)),
   ];
 
-  let path = req['route'].path;
+  // const routerPath = [
+  //   config[process.env.NODE_ENV].server.urlPrefix,
+  //   ...req.baseUrl
+  //     .substring(config[process.env.NODE_ENV].server.urlPrefix.length)
+  //     .split('/')
+  //     .filter((item) => item != ''),
+  // ];
+
+  let path = req.route.path;
   path = path.replace(/\*/g, '');
+
+  routerPath.forEach((item) => {
+    const regex = new RegExp(`/${item}`, 'g');
+    path = path.replace(regex, '');
+  });
+  console.log(routerPath, path);
 
   const routerPermissions = getRouterPermissions(routerPath)[path];
 

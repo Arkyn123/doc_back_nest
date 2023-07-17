@@ -10,6 +10,7 @@ import {
   Query,
   Res,
   Req,
+  Next,
 } from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { DocumentDTO } from './dto/DocumentDTO';
@@ -29,61 +30,50 @@ export class DocumentController {
   }
 
   @Get('/:documentId')
-  getDocumentById(@Param('documentId') documentId: string) {
-    return this.documentService.getDocumentById(documentId);
+  getDocumentById(@Req() req, @Res() res) {
+    return this.documentService.getDocumentById(req, res);
   }
 
   @Post('/add')
-  addNewDocument(@Body() documentDTO: DocumentDTO) {
-    return this.documentService.addNewDocument(documentDTO);
+  addNewDocument(@Req() req, @Res() res) {
+    return this.documentService.addNewDocument(req, res);
   }
 
   @Post('/addInDraft')
-  addNewDocumentInDraft(@Body() documentDTO: DocumentDTO) {
-    return this.documentService.addNewDocumentInDraft(documentDTO);
+  addNewDocumentInDraft(@Req() req, @Res() res) {
+    return this.documentService.addNewDocumentInDraft(req, res);
   }
 
   @UseGuards(PermGuard)
   @Put('/update/:documentId')
-  updateDocumentByDocumentId(
-    @Param('documentId') documentId: string,
-    @Body() updateDocumentDTO: UpdateDocumentDTO,
-  ) {
-    return this.documentService.updateDocumentByDocumentId(
-      documentId,
-      updateDocumentDTO,
-    );
+  async updateDocumentByDocumentId(@Req() req, @Res() res, @Next() next) {
+    await this.documentService.updateDocumentInfoForRole(req, res, next);
+    return this.documentService.updateDocumentByDocumentId(req, res);
   }
-  @UseGuards(PermGuard)
+
+  // @UseGuards(PermGuard)
   @Put('/updateFromDraftAndRevision/:documentId')
-  updateDocumentFromDraftAndRevisionByDocumentId(
-    @Param('documentId') documentId: string,
-  ) {
+  updateDocumentFromDraftAndRevisionByDocumentId(@Req() req, @Res() res) {
     return this.documentService.updateDocumentFromDraftAndRevisionByDocumentId(
-      documentId,
+      req,
+      res,
     );
   }
 
-  @UseGuards(PermGuard)
+  // @UseGuards(PermGuard)
   @Put('/updateInfoForRole/:documentId')
-  updateInfoForRole(
-    @Param('documentId') documentId: string,
-    @Body() updateDocumentDTO: UpdateDocumentDTO,
-  ) {
-    return this.documentService.updateDocumentInfoForRole(
-      documentId,
-      updateDocumentDTO,
-    );
+  updateInfoForRole(@Req() req, @Res() res, @Next() next) {
+    return this.documentService.updateDocumentInfoForRole(req, res, next);
   }
 
-  @UseGuards(PermGuard)
+  // @UseGuards(PermGuard)
   @Put('/updateDocumentFlagDeleted/:documentId')
-  updateDocumentFlagDeleted(@Param('documentId') documentId: string) {
-    return this.documentService.updateDocumentFlagDeleted(documentId);
+  updateDocumentFlagDeleted(@Req() req, @Res() res) {
+    return this.documentService.updateDocumentFlagDeleted(req, res);
   }
 
   @Delete('/delete')
-  deleteAllDocuments() {
-    return this.documentService.deleteAllDocuments();
+  deleteAllDocuments(@Res() res) {
+    return this.documentService.deleteAllDocuments(res);
   }
 }
