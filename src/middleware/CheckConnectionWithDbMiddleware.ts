@@ -1,6 +1,5 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-
 import { Sequelize } from 'sequelize';
 import { config } from '../utils/config';
 
@@ -9,28 +8,26 @@ export class CheckConnectionWithDB implements NestMiddleware {
   private sequelize: Sequelize;
 
   constructor() {
+    const databaseConfig = config[process.env.NODE_ENV].database;
     this.sequelize = new Sequelize({
-      dialect: config[process.env.NODE_ENV].database.dialect,
-      host: config[process.env.NODE_ENV].database.host,
-      port: +config[process.env.NODE_ENV].database.port,
-      username: config[process.env.NODE_ENV].database.username,
-      password: config[process.env.NODE_ENV].database.password,
-      database: config[process.env.NODE_ENV].database.database,
+      dialect: databaseConfig.dialect,
+      host: databaseConfig.host,
+      port: +databaseConfig.port,
+      username: databaseConfig.username,
+      password: databaseConfig.password,
+      database: databaseConfig.database,
     });
   }
 
   async use(req: Request, res: Response, next: NextFunction) {
     try {
       await this.sequelize.authenticate();
-      console.log(
-        `DB connected\t${config[process.env.NODE_ENV].database.dialect}://${
-          config[process.env.NODE_ENV].database.host
-        }:${config[process.env.NODE_ENV].database.port}`,
-      );
+      const { dialect, host, port } = config[process.env.NODE_ENV].database;
+      console.log(`DB connected\t${dialect}://${host}:${port}`);
     } catch (err) {
-      console.log('Server cannot connect to database');
+      console.log('Server cannot connect to the database');
     }
-    // ===> setWantedPermission
+    
     next();
   }
 }

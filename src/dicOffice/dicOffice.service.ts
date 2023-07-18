@@ -24,10 +24,11 @@ export class DicOfficeService {
       });
       return res.status(errors.success.code).json(dic_office);
     } catch (e) {
-      console.log(e);
+      console.log(e.message);
       return res.sendStatus(errors.internalServerError.code);
     }
   }
+
   async addInDictionary(req, res) {
     try {
       const dic_office = await this.dicOfficeRepository.create({

@@ -1,16 +1,17 @@
 import { config } from '../../utils/config';
 
 const getRouterPermissions = (path) => {
-  var permissions = require('../../utils/permissions');
+  let permissions = require('../../utils/permissions');
 
   path.forEach((item) => {
     permissions = permissions[item];
   });
+
   return permissions;
 };
 
 export default async function setWantedPermission(req) {
-  let url = req['originalUrl'];
+  let url = req.originalUrl;
   let parts = url.split('/');
   url = parts.slice(0, 2).join('/');
 
@@ -27,7 +28,7 @@ export default async function setWantedPermission(req) {
     path = path.replace(regex, '');
   });
 
-  if (path == '') path = '/';
+  if (path === '') path = '/';
   console.log(routerPath, path);
 
   const routerPermissions = getRouterPermissions(routerPath)[path];
@@ -39,12 +40,11 @@ export default async function setWantedPermission(req) {
     field: routerPermissions
       .filter((p) => p.field !== undefined)
       .map((p) => p.field)[0],
+    authenticated: null,
   };
 
-  permissions['authenticated'] =
-    !permissions.roles.length && !permissions.field;
+  permissions.authenticated = !permissions.roles.length && !permissions.field;
 
-  req['permissions'] = permissions;
+  req.permissions = permissions;
   // ===> setUserToRequest
-  //   next();
 }

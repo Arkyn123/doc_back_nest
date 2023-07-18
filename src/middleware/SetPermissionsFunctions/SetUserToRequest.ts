@@ -3,7 +3,7 @@ import errors from 'src/utils/errors';
 import fetch from 'node-fetch';
 
 //Форматирование имени (ИВАНОВ ИВАН ИВАНОВИЧ => Иванов Иван Иванович)
-const camelCase = (rawWord: string): string => {
+const camelCase = (rawWord) => {
   return rawWord
     .trim()
     .split(' ')
@@ -13,7 +13,7 @@ const camelCase = (rawWord: string): string => {
 };
 
 export default async function setUserToRequest(req, res) {
-  return !req['permissions'].authenticated
+  return !req.permissions.authenticated
     ? null
     : !req.headers.authorization
     ? res.sendStatus(errors.unauthorized.code)
@@ -37,8 +37,8 @@ export default async function setUserToRequest(req, res) {
             id: parseInt(userFromService.emp, 10),
             fullname: camelCase(userFromService.FIO),
           };
-          req['user'] = user;
-          req['token'] = req.headers.authorization.split(' ')[1];
+          req.user = user;
+          req.token = req.headers.authorization.split(' ')[1];
           // ===> SetRolesToRequest
         } catch (error) {
           return res.sendStatus(errors.badRequest.code);

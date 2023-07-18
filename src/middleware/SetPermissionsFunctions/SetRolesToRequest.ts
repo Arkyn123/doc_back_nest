@@ -3,9 +3,9 @@ import errors from 'src/utils/errors';
 import fetch from 'node-fetch';
 
 export default async function setRolesToRequest(req, res) {
-  return !req['permissions'].authenticated
+  return !req.permissions.authenticated
     ? null
-    : !req['user']
+    : !req.user
     ? res.sendStatus(errors.unauthorized.code)
     : (async () => {
         try {
@@ -15,11 +15,11 @@ export default async function setRolesToRequest(req, res) {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${req['token']}`,
+                Authorization: `Bearer ${req.token}`,
               },
               body: JSON.stringify({
                 query: `query {
-                              Workers(employeeNumber: ${req['user'].id}) {
+                              Workers(employeeNumber: ${req.user.id}) {
                                   positions {
                                       office {
                                           id
