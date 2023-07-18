@@ -12,12 +12,15 @@ import fetch from 'node-fetch';
 import { DocumentRoute } from 'src/documentRoute/documentRoute.model';
 import { DocumentType } from 'src/documentType/documentType.model';
 import { DocumentOrderLog } from 'src/documentOrderLog/documentOrderLog.model';
+import { DocumentRouteService } from 'src/documentRoute/documentRoute.service';
 
 @Injectable()
 export class DocumentService {
   constructor(
     @InjectModel(Document)
     private readonly documentRepository: typeof Document,
+    @InjectModel(DocumentRoute)
+    private readonly documentRouteRepository: typeof DocumentRoute,
   ) {}
 
   async getAllDocument(req, res) {
@@ -194,13 +197,14 @@ export class DocumentService {
         },
       );
 
-      const route = await DocumentRoute.findOne({
+      const route = await this.documentRouteRepository.findOne({
         where: {
           orderId: document.dataValues.order,
           documentType: document.dataValues.documentType,
         },
         include: [{ all: true, nested: true, duplicating: true }],
       });
+      console.log(route);
 
       return res.status(errors.success.code).json({ document, route });
     } catch (e) {
