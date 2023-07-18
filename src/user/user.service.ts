@@ -1,26 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { Request } from 'express';
+import errors from 'src/utils/errors';
+
 @Injectable()
 export class UserService {
-  getUser(req: Request) {
-    console.log(req.body)
-    return;
-
-    // const user = req.user;
-
-    // const roles = req.roles;
-
-    // const officeId = req.officeId;
-    // // console.log({
-    // //   user,
-    // //   roles,
-    // //   officeId,
-    // // });
-
-    // return {
-    //   user,
-    //   roles,
-    //   officeId,
-    // };
+  async getUser(req, res) {
+    return res.status(errors.success.code).json({
+      user: req.user,
+      roles: req.roles,
+      officeId: req.officeId,
+    });
   }
 }

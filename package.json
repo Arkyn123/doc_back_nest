@@ -37,6 +37,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "sequelize-search-builder": "^0.11.0",
+    "tedious": "^16.2.0",
     "typeorm": "^0.3.17"
   },
   "devDependencies": {

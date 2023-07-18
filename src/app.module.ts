@@ -41,7 +41,7 @@ import { DicOffice } from './dicOffice/dicOffice.model';
 import { DicOfficeCorrespondenceModule } from './dicOfficeCorrespondence/dicOfficeCorrespondence.module';
 import { DicOfficeCorrespondence } from './dicOfficeCorrespondence/dicOfficeCorrespondence.model';
 
-import { T_XXHR_SCHEDULE_BRIGADES } from './T_XXHR_SCHEDULE_BRIGADES/T_XXHR_SCHEDULE_BRIGADES.model';
+import { T_XXHR_SCHEDULE_BRIGADES } from './find-mssql/T_XXHR_SCHEDULE_BRIGADES.model';
 
 import { CheckConnectionWithDB } from './middleware/CheckConnectionWithDbMiddleware';
 import { setPermissions } from './middleware/SetPermissions';
