@@ -1,5 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
+
 import { Sequelize } from 'sequelize';
 import { config } from '../utils/config';
 

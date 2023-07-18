@@ -53,8 +53,8 @@ import { DocumentOrderLogModule } from './documentOrderLog/documentOrderLog.modu
 
 @Module({
   imports: [
-    databasePgModule,
     databaseMssqlModule,
+    databasePgModule,
     UserModule,
     DocumentModule,
     ReportModule,

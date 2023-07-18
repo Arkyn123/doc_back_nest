@@ -1,4 +1,5 @@
-import { Column, Model, Table, DataType } from 'sequelize-typescript';
+import { Column, Model, Table, DataType, HasMany } from 'sequelize-typescript';
+import { Document } from '../document/document.model';
 
 @Table({
   tableName: 'DocumentStatus',
@@ -22,4 +23,7 @@ export class DocumentStatus extends Model<DocumentStatus> {
 
   @Column({ type: DataType.STRING(128), allowNull: false })
   ownerFullname: string;
+
+  @HasMany(() => Document, 'statusId')
+  documents: Document[];
 }

@@ -61,7 +61,7 @@ export default async function setRolesToRequest(req, res) {
             });
           }
 
-          if (adminUser.includes(req['user'].id)) {
+          if (adminUser.includes(req.user.id)) {
             roles.push({ idAccessCode: 'admin', idOffice: null });
           }
 
@@ -75,9 +75,9 @@ export default async function setRolesToRequest(req, res) {
               ),
           );
 
-          req['user'].roles = roles;
-          req['user'].officeId = office.id;
-          req['user'].officeName = office.name;
+          req.user.roles = roles;
+          req.user.officeId = office.id;
+          req.user.officeName = office.name;
           // ===> CheckPermissions
         } catch (error) {
           return res.sendStatus(errors.badRequest.code);

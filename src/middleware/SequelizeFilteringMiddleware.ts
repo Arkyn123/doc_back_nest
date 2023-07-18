@@ -58,6 +58,7 @@ export class SequelizeFiltering implements NestMiddleware {
               return filter;
             };
     } catch (e) {
+      console.log(e.message);
       req['filter'] = {};
     }
     next();

@@ -19,14 +19,6 @@ export default async function setWantedPermission(req) {
     ...url.split('/').filter((item) => item !== '' && isNaN(item)),
   ];
 
-  // const routerPath = [
-  //   config[process.env.NODE_ENV].server.urlPrefix,
-  //   ...req.baseUrl
-  //     .substring(config[process.env.NODE_ENV].server.urlPrefix.length)
-  //     .split('/')
-  //     .filter((item) => item != ''),
-  // ];
-
   let path = req.route.path;
   path = path.replace(/\*/g, '');
 
