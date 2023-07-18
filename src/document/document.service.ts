@@ -11,7 +11,7 @@ import fetch from 'node-fetch';
 
 import { DocumentRoute } from 'src/documentRoute/documentRoute.model';
 import { DocumentType } from 'src/documentType/documentType.model';
-import { DocumentOrderLog } from 'src/documentOrderLog/DocumentOrderLog.model';
+import { DocumentOrderLog } from 'src/documentOrderLog/documentOrderLog.model';
 
 @Injectable()
 export class DocumentService {
@@ -137,7 +137,7 @@ export class DocumentService {
         filter.where['authorPersonalNumber'] = { [Op.eq]: req.user.id };
       }
 
-      const documents = await Document.findAll({
+      const documents = await this.documentRepository.findAll({
         ...filter,
         flagDeleted: [
           {
@@ -157,9 +157,12 @@ export class DocumentService {
 
   async getDocumentById(req, res) {
     try {
-      const document = await Document.findByPk(req.params.documentId, {
-        include: [{ all: true, nested: true, duplicating: true }],
-      });
+      const document = await this.documentRepository.findByPk(
+        req.params.documentId,
+        {
+          include: [{ all: true, nested: true, duplicating: true }],
+        },
+      );
 
       const route = await DocumentRoute.findOne({
         where: {
@@ -196,7 +199,7 @@ export class DocumentService {
       if (!type) {
         return res.sendStatus(errors.notFound.code);
       }
-      const document = await Document.create({
+      const document = await this.documentRepository.create({
         body: req.body.body,
         documentType: type.dataValues.id,
         documentTypeDescription: type.dataValues.description,
@@ -241,7 +244,7 @@ export class DocumentService {
       if (!type) {
         return res.sendStatus(errors.notFound.code);
       }
-      const document = await Document.create({
+      const document = await this.documentRepository.create({
         body: req.body.body,
         documentType: type.dataValues.id,
         documentTypeDescription: type.dataValues.description,
@@ -286,9 +289,12 @@ export class DocumentService {
 
   async updateDocumentByDocumentId(req, res) {
     try {
-      const document = await Document.findByPk(req.params.documentId, {
-        include: [{ all: true, nested: true, duplicating: true }],
-      });
+      const document = await this.documentRepository.findByPk(
+        req.params.documentId,
+        {
+          include: [{ all: true, nested: true, duplicating: true }],
+        },
+      );
 
       const route = await DocumentRoute.findOne({
         where: {
@@ -358,9 +364,12 @@ export class DocumentService {
           });
         }
         //для обновления статуса
-        const documentNew = await Document.findByPk(req.params.documentId, {
-          include: [{ all: true, nested: true, duplicating: true }],
-        });
+        const documentNew = await this.documentRepository.findByPk(
+          req.params.documentId,
+          {
+            include: [{ all: true, nested: true, duplicating: true }],
+          },
+        );
         await DocumentOrderLog.create({
           documentId: documentNew.dataValues.id,
           order: documentNew.dataValues.order,
@@ -383,9 +392,12 @@ export class DocumentService {
 
   async updateDocumentInfoForRole(req, res, next) {
     try {
-      const document = await Document.findByPk(req.params.documentId, {
-        include: [{ all: true, nested: true, duplicating: true }],
-      });
+      const document = await this.documentRepository.findByPk(
+        req.params.documentId,
+        {
+          include: [{ all: true, nested: true, duplicating: true }],
+        },
+      );
 
       await document.update({
         dateApplication: req.body.dateApplication,
@@ -403,9 +415,12 @@ export class DocumentService {
 
   async updateDocumentFromDraftAndRevisionByDocumentId(req, res) {
     try {
-      const document = await Document.findByPk(req.params.documentId, {
-        include: [{ all: true, nested: true, duplicating: true }],
-      });
+      const document = await this.documentRepository.findByPk(
+        req.params.documentId,
+        {
+          include: [{ all: true, nested: true, duplicating: true }],
+        },
+      );
       if (!document) {
         return res.sendStatus(errors.notFound.code);
       }
@@ -435,9 +450,12 @@ export class DocumentService {
           officeId: req.body.officeId,
           documentType: req.body.documentType,
         });
-        const documentUpdated = await Document.findByPk(req.params.documentId, {
-          include: [{ all: true, nested: true, duplicating: true }],
-        });
+        const documentUpdated = await this.documentRepository.findByPk(
+          req.params.documentId,
+          {
+            include: [{ all: true, nested: true, duplicating: true }],
+          },
+        );
         const routeNext = await DocumentRoute.findOne({
           where: {
             orderId: 1,
@@ -476,9 +494,12 @@ export class DocumentService {
 
   async updateDocumentFlagDeleted(req, res) {
     try {
-      const document = await Document.findByPk(req.params.documentId, {
-        include: [{ all: true, nested: true, duplicating: true }],
-      });
+      const document = await this.documentRepository.findByPk(
+        req.params.documentId,
+        {
+          include: [{ all: true, nested: true, duplicating: true }],
+        },
+      );
       if (!document) {
         return res.sendStatus(errors.notFound.code);
       }
@@ -497,7 +518,7 @@ export class DocumentService {
 
   async deleteAllDocuments(res) {
     try {
-      Document.destroy({
+      this.documentRepository.destroy({
         where: {},
       });
       return res.status(errors.success.code).json('delete all');

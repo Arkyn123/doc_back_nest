@@ -18,14 +18,14 @@ import { Document } from './document/document.model';
 
 import { DocumentStatus } from './documentStatus/documentStatus.model';
 
-import { DocumentOrderLog } from './documentOrderLog/DocumentOrderLog.model';
+import { DocumentOrderLog } from './documentOrderLog/documentOrderLog.model';
 
 import { ReportModule } from './report/report.module';
 
 import { FindMssqlModule } from './find-mssql/find-mssql.module';
 
-import { FileModule } from './file/file.module';
-import { File } from './file/file.model';
+import { DocumentFileModule } from './documentFile/documentFile.module';
+import { DocumentFile } from './documentFile/documentFile.model';
 
 import { DocumentTypeModule } from './documentType/documentType.module';
 import { DocumentType } from './documentType/documentType.model';
@@ -46,37 +46,21 @@ import { T_XXHR_SCHEDULE_BRIGADES } from './find-mssql/T_XXHR_SCHEDULE_BRIGADES.
 import { CheckConnectionWithDB } from './middleware/CheckConnectionWithDbMiddleware';
 import { setPermissions } from './middleware/SetPermissions';
 import { SequelizeFiltering } from './middleware/SequelizeFilteringMiddleware';
+import { config } from './utils/config';
+import { databasePgModule } from './databases/databasePG.module';
+import { databaseMssqlModule } from './databases/databaseMssql.module';
+import { DocumentOrderLogModule } from './documentOrderLog/documentOrderLog.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: `.${process.env.NODE_ENV}.env`,
-    }),
-    SequelizeModule.forRoot({
-      dialect: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: +process.env.POSTGRESS_PORT,
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRESS_PASSWORD,
-      database: process.env.POSTGRES_DB,
-      autoLoadModels: true,
-      models: [
-        Document,
-        DocumentStatus,
-        DocumentOrderLog,
-        File,
-        DocumentType,
-        DocumentRoute,
-        DicOffice,
-        DicOfficeCorrespondence,
-        T_XXHR_SCHEDULE_BRIGADES,
-      ],
-    }),
+    databasePgModule,
+    databaseMssqlModule,
     UserModule,
     DocumentModule,
     ReportModule,
     FindMssqlModule,
-    FileModule,
+    DocumentFileModule,
+    DocumentOrderLogModule,
     DocumentTypeModule,
     DocumentStatusModule,
     DocumentRouteModule,

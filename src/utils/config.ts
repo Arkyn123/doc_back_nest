@@ -1,5 +1,6 @@
 export const config = {
   development: {
+    port: 3000,
     database: {
       username: 'postgres',
       password: 'root',

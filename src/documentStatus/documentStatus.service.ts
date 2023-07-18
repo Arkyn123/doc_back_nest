@@ -10,6 +10,7 @@ export class DocumentStatusService {
     @InjectModel(DocumentStatus)
     private readonly documentStatusRepository: typeof DocumentStatus,
   ) {}
+
   async getAllStatuses(req, res) {
     try {
       const statuses = await this.documentStatusRepository.findAll();

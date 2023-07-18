@@ -1,7 +1,7 @@
 import { Column, Model, Table, DataType } from 'sequelize-typescript';
 
-@Table({ tableName: 'File', freezeTableName: true })
-export class File extends Model<File> {
+@Table({ tableName: 'DocumentFile', freezeTableName: true })
+export class DocumentFile extends Model<DocumentFile> {
   @Column({
     type: DataType.INTEGER,
     autoIncrement: true,

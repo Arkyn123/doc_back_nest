@@ -1,4 +1,12 @@
-import { Column, Model, Table, DataType } from 'sequelize-typescript';
+import {
+  Column,
+  Model,
+  Table,
+  DataType,
+  BelongsTo,
+  ForeignKey,
+} from 'sequelize-typescript';
+import { Document } from '../document/document.model';
 
 @Table({ tableName: 'DocumentOrderLog', freezeTableName: true })
 export class DocumentOrderLog extends Model<DocumentOrderLog> {
@@ -10,7 +18,11 @@ export class DocumentOrderLog extends Model<DocumentOrderLog> {
   })
   id: number;
 
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @ForeignKey(() => Document)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
   documentId: number;
 
   @Column({ type: DataType.INTEGER, allowNull: false })
@@ -33,4 +45,7 @@ export class DocumentOrderLog extends Model<DocumentOrderLog> {
 
   @Column({ type: DataType.STRING(128), allowNull: true })
   registrationNumber: string;
+
+  @BelongsTo(() => Document, 'documentId')
+  document: Document;
 }

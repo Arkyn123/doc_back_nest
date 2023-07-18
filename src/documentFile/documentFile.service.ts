@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { File } from './file.model';
+import { DocumentFile } from './documentFile.model';
 import errors from 'src/utils/errors';
 @Injectable()
-export class FileService {
+export class DocumentFileService {
   constructor(
-    @InjectModel(File)
-    private readonly fileRepository: typeof File,
+    @InjectModel(DocumentFile)
+    private readonly documentFileRepository: typeof DocumentFile,
   ) {}
 
   async addNewFile(req, res) {
     try {
-      const newFile = await this.fileRepository.create({
+      const newFile = await this.documentFileRepository.create({
         ...req.body,
       });
       return res.status(errors.success.code).json(newFile);
@@ -22,7 +22,7 @@ export class FileService {
 
   async getFileById(req, res) {
     try {
-      const file = await this.fileRepository.findAll({
+      const file = await this.documentFileRepository.findAll({
         where: {
           documentId: req.params.id,
           statusDelete: false,
@@ -35,7 +35,7 @@ export class FileService {
   }
   async getFiles(req, res) {
     try {
-      const files = await this.fileRepository.findAll({
+      const files = await this.documentFileRepository.findAll({
         include: [{ all: true, nested: true, duplicating: true }],
         where: { statusDelete: false },
       });
@@ -48,7 +48,7 @@ export class FileService {
   }
   async deleteFile(req, res) {
     try {
-      const file = await this.fileRepository.findOne({
+      const file = await this.documentFileRepository.findOne({
         where: {
           id: req.params.id,
         },
