@@ -43,11 +43,6 @@ const setPermissionsPaths = [
 
   { path: 'documentType', method: RequestMethod.GET },
 
-  { path: 'file/', method: RequestMethod.GET },
-  { path: 'file/:id', method: RequestMethod.GET },
-  { path: 'file/add', method: RequestMethod.POST },
-  { path: 'file/delete/:id', method: RequestMethod.PUT },
-
   { path: 'findMSSQL/schedule', method: RequestMethod.GET },
   { path: 'findMSSQL/brigada', method: RequestMethod.GET },
 

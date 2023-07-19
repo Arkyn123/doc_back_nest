@@ -9,6 +9,21 @@ export class DocumentFileService {
     private readonly documentFileRepository: typeof DocumentFile,
   ) {}
 
+  async getFiles(req, res) {
+    try {
+      const files = await this.documentFileRepository.findAll({
+        include: [{ all: true, nested: true, duplicating: true }],
+        where: { statusDelete: false },
+      });
+
+      return res
+        .status(errors.success.code)
+        .json(files.map((e) => e.documentId));
+    } catch (error) {
+      res.sendStatus(errors.internalServerError.code);
+    }
+  }
+
   async addNewFile(req, res) {
     try {
       const newFile = await this.documentFileRepository.create({
@@ -33,19 +48,7 @@ export class DocumentFileService {
       res.sendStatus(errors.internalServerError.code);
     }
   }
-  async getFiles(req, res) {
-    try {
-      const files = await this.documentFileRepository.findAll({
-        include: [{ all: true, nested: true, duplicating: true }],
-        where: { statusDelete: false },
-      });
-      return res
-        .status(errors.success.code)
-        .json(files.map((e) => e.documentId));
-    } catch (error) {
-      res.sendStatus(errors.internalServerError.code);
-    }
-  }
+
   async deleteFile(req, res) {
     try {
       const file = await this.documentFileRepository.findOne({

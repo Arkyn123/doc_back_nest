@@ -10,69 +10,62 @@ export class PermGuard implements CanActivate {
     @InjectModel(Document)
     private readonly documentRepository: typeof Document,
   ) {}
+
   //OwnerOrHasPermissions
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<Request>();
     const res = context.switchToHttp().getResponse<Response>();
-    let object;
 
-    (async () => {
-      object = await this.documentRepository.findByPk(req.params.documentId, {
+    const object = await this.documentRepository.findByPk(
+      req.params.documentId,
+      {
         include: [{ all: true, nested: true, duplicating: true }],
-      });
-    })();
+      },
+    );
 
     if (!object) {
-      res.sendStatus(errors.notFound.code);
+      console.log('не найден документ в permGuard');
+
       return false;
     }
+
+    if (req['user']['roles'].some((item) => item.idAccessCode === 'admin'))
+      return true;
 
     if (req['permissions'].authenticated) {
       if (!req['permissions'].roleWanted && !req['permissions'].fieldWanted) {
         return true;
       }
 
-      if (
-        req['permissions'].roleWanted &&
-        req['permissions'].rolePassed &&
-        (req['permissions'].fieldWanted ||
-          req['permissions'].officeCheckWanted) &&
-        ((Object.entries(req['permissions'].field)[0] &&
-          object['_options'].attributes.includes(
-            Object.entries(req['permissions'].field)[0][0],
-          ) &&
-          object[Object.entries(req['permissions'].field)[0][0]] ==
-            req['user'][Object.entries(req['permissions'].field)[0][1]]) ||
-          req['roles']
-            .map((r) => r.idOffice)
-            .some((r) => r == object['officeId']))
-      ) {
-        return true;
+      const { field } = req['permissions'];
+
+      if (req['permissions'].roleWanted && req['permissions'].rolePassed) {
+        if (
+          req['permissions'].fieldWanted ||
+          req['permissions'].officeCheckWanted
+        ) {
+          const entry = Object.entries(field)[0];
+          const attributeName = entry[0];
+          const userField = req['user'][entry[1]];
+          return (
+            (entry &&
+              object['_options'].attributes.includes(attributeName) &&
+              object[attributeName] === userField) ||
+            req['user']['roles'].some((r) => r.idOffice == object['officeId'])
+          );
+        }
       }
 
-      if (
-        req['permissions'].fieldWanted &&
-        Object.entries(req['permissions'].field)[0] &&
-        object['_options'].attributes.includes(
-          Object.entries(req['permissions'].field)[0][0],
-        ) &&
-        object[Object.entries(req['permissions'].field)[0][0]] ==
-          req['user'][Object.entries(req['permissions'].field)[0][1]]
-      ) {
-        return true;
+      if (req['permissions'].fieldWanted) {
+        const entry = Object.entries(field)[0];
+        return (
+          entry &&
+          object['_options'].attributes.includes(entry[0]) &&
+          object[entry[0]] === req['user'][entry[1]]
+        );
       }
 
-      if (
-        req['permissions'].fieldWanted &&
-        Object.entries(req['permissions'].field)[0] &&
-        !object['_options'].attributes.includes(
-          Object.entries(req['permissions'].field)[0][0],
-        )
-      ) {
-        return true;
-      }
-
-      return false;
+      return !Object.entries(field)[0];
     } else {
       return true;
     }

@@ -34,46 +34,45 @@ export class DocumentController {
     return this.documentService.getDocumentById(req, res);
   }
 
-  // @Post('/add')
-  // addNewDocument(@Req() req, @Res() res) {
-  //   return this.documentService.addNewDocument(req, res);
-  // }
+  @Post('/add')
+  addNewDocument(@Req() req, @Res() res) {
+    return this.documentService.addNewDocument(req, res);
+  }
 
-  // @Post('/addInDraft')
-  // addNewDocumentInDraft(@Req() req, @Res() res) {
-  //   return this.documentService.addNewDocumentInDraft(req, res);
-  // }
+  @Post('/addInDraft')
+  addNewDocumentInDraft(@Req() req, @Res() res) {
+    return this.documentService.addNewDocumentInDraft(req, res);
+  }
 
-  // @UseGuards(PermGuard)
-  // @Put('/update/:documentId')
-  // async updateDocumentByDocumentId(@Req() req, @Res() res, @Next() next) {
-  //   await this.documentService.updateDocumentInfoForRole(req, res, next);
-  //   return this.documentService.updateDocumentByDocumentId(req, res);
-  // }
+  @UseGuards(PermGuard)
+  @Put('/update/:documentId')
+  async updateDocumentByDocumentId(@Req() req, @Res() res) {
+    return this.documentService.updateDocumentByDocumentId(req, res);
+  }
 
-  // // @UseGuards(PermGuard)
-  // @Put('/updateFromDraftAndRevision/:documentId')
-  // updateDocumentFromDraftAndRevisionByDocumentId(@Req() req, @Res() res) {
-  //   return this.documentService.updateDocumentFromDraftAndRevisionByDocumentId(
-  //     req,
-  //     res,
-  //   );
-  // }
+  @UseGuards(PermGuard)
+  @Put('/updateFromDraftAndRevision/:documentId')
+  updateDocumentFromDraftAndRevisionByDocumentId(@Req() req, @Res() res) {
+    return this.documentService.updateDocumentFromDraftAndRevisionByDocumentId(
+      req,
+      res,
+    );
+  }
 
-  // // @UseGuards(PermGuard)
-  // @Put('/updateInfoForRole/:documentId')
-  // updateInfoForRole(@Req() req, @Res() res, @Next() next) {
-  //   return this.documentService.updateDocumentInfoForRole(req, res, next);
-  // }
+  @UseGuards(PermGuard)
+  @Put('/updateInfoForRole/:documentId')
+  updateInfoForRole(@Req() req, @Res() res) {
+    return this.documentService.updateDocumentInfoForRole(req, res);
+  }
 
-  // // @UseGuards(PermGuard)
-  // @Put('/updateDocumentFlagDeleted/:documentId')
-  // updateDocumentFlagDeleted(@Req() req, @Res() res) {
-  //   return this.documentService.updateDocumentFlagDeleted(req, res);
-  // }
+  @UseGuards(PermGuard)
+  @Put('/updateDocumentFlagDeleted/:documentId')
+  updateDocumentFlagDeleted(@Req() req, @Res() res) {
+    return this.documentService.updateDocumentFlagDeleted(req, res);
+  }
 
-  // @Delete('/delete')
-  // deleteAllDocuments(@Res() res) {
-  //   return this.documentService.deleteAllDocuments(res);
-  // }
+  @Delete('/delete')
+  deleteAllDocuments(@Res() res) {
+    return this.documentService.deleteAllDocuments(res);
+  }
 }

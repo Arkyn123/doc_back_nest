@@ -3,12 +3,20 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { DocumentController } from './document.controller';
 import { DocumentService } from './document.service';
 import { Document } from './document.model';
-import { DocumentRouteModule } from 'src/documentRoute/documentRoute.module';
 import { DocumentRoute } from 'src/documentRoute/documentRoute.model';
+import { DocumentType } from 'src/documentType/documentType.model';
+import { DocumentOrderLog } from 'src/documentOrderLog/DocumentOrderLog.model';
 
 @Module({
   controllers: [DocumentController],
   providers: [DocumentService],
-  imports: [SequelizeModule.forFeature([Document, DocumentRoute])],
+  imports: [
+    SequelizeModule.forFeature([
+      Document,
+      DocumentRoute,
+      DocumentType,
+      DocumentOrderLog,
+    ]),
+  ],
 })
 export class DocumentModule {}

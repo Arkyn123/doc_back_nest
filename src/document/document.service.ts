@@ -21,6 +21,10 @@ export class DocumentService {
     private readonly documentRepository: typeof Document,
     @InjectModel(DocumentRoute)
     private readonly documentRouteRepository: typeof DocumentRoute,
+    @InjectModel(DocumentType)
+    private readonly documentTypeRepository: typeof DocumentType,
+    @InjectModel(DocumentOrderLog)
+    private readonly documentOrderLogRepository: typeof DocumentOrderLog,
   ) {}
 
   async getAllDocument(req, res) {
@@ -181,8 +185,6 @@ export class DocumentService {
 
       return res.status(errors.success.code).json(documents);
     } catch (e) {
-      console.log('/////////////');
-
       console.warn(e.message);
       return res.sendStatus(errors.internalServerError.code);
     }
@@ -199,365 +201,396 @@ export class DocumentService {
 
       const route = await this.documentRouteRepository.findOne({
         where: {
-          orderId: document.dataValues.order,
-          documentType: document.dataValues.documentType,
+          orderId: document.order,
+          documentType: document.documentType,
         },
         include: [{ all: true, nested: true, duplicating: true }],
       });
-      console.log(route);
 
       return res.status(errors.success.code).json({ document, route });
     } catch (e) {
       console.log(e.message);
-
       return res.sendStatus(errors.internalServerError.code);
     }
   }
 
-  // async addNewDocument(req, res) {
-  //   try {
-  //     const route = await DocumentRoute.findOne({
-  //       where: {
-  //         orderId: 1,
-  //         documentType: req.body.documentType,
-  //       },
-  //     });
-  //     if (!route) {
-  //       return res.sendStatus(errors.notFound.code);
-  //     }
-  //     const type = await DocumentType.findOne({
-  //       where: {
-  //         id: req.body.documentType,
-  //       },
-  //     });
-  //     if (!type) {
-  //       return res.sendStatus(errors.notFound.code);
-  //     }
-  //     const document = await this.documentRepository.create({
-  //       body: req.body.body,
-  //       documentType: type.dataValues.id,
-  //       documentTypeDescription: type.dataValues.description,
-  //       authorPersonalNumber: req.user.id,
-  //       authorFullname: req.user.fullname,
-  //       dateApplication: req.body.dateApplication,
-  //       statusId: 3,
-  //       order: 1,
-  //       permitionCurrent: route.dataValues.permition,
-  //       permitionCurrentDesc: route.dataValues.description,
-  //       documentTemplateID: req.body.documentTemplateID,
-  //       users: req.body.users,
-  //       usernames: req.body.users.map((u) => u.fullname).join(),
-  //       officeName: req.body.officeName,
-  //     });
-  //     return res.status(errors.success.code).json(document.dataValues);
-  //   } catch (e) {
-  //     console.log(e);
-  //     if (e instanceof ValidationError) {
-  //       return res.sendStatus(errors.badRequest.code);
-  //     }
-  //     return res.sendStatus(errors.internalServerError.code);
-  //   }
-  // }
+  async addNewDocument(req, res) {
+    try {
+      const route = await this.documentRouteRepository.findOne({
+        where: {
+          orderId: 1,
+          documentType: req.body.documentType,
+        },
+      });
+      if (!route) {
+        return res.sendStatus(errors.notFound.code);
+      }
+      const type = await this.documentTypeRepository.findOne({
+        where: {
+          id: req.body.documentType,
+        },
+      });
+      if (!type) {
+        return res.sendStatus(errors.notFound.code);
+      }
 
-  // async addNewDocumentInDraft(req, res) {
-  //   try {
-  //     const route = await DocumentRoute.findOne({
-  //       where: {
-  //         orderId: 1,
-  //         documentType: req.body.documentType,
-  //       },
-  //     });
-  //     if (!route) {
-  //       return res.sendStatus(errors.notFound.code);
-  //     }
-  //     const type = await DocumentType.findOne({
-  //       where: {
-  //         id: req.body.documentType,
-  //       },
-  //     });
-  //     if (!type) {
-  //       return res.sendStatus(errors.notFound.code);
-  //     }
-  //     const document = await this.documentRepository.create({
-  //       body: req.body.body,
-  //       documentType: type.dataValues.id,
-  //       documentTypeDescription: type.dataValues.description,
-  //       authorPersonalNumber: req.user.id,
-  //       authorFullname: req.user.fullname,
-  //       dateApplication: req.body.dateApplication,
-  //       statusId: 1,
-  //       order: 1,
-  //       permitionCurrent: route.dataValues.permition,
-  //       permitionCurrentDesc: route.dataValues.description,
-  //       documentTemplateID: req.body.documentTemplateID,
-  //       users: req.body.users,
-  //       usernames: req.body.users
-  //         ? req.body.users.map((u) => u.fullname).join(' ')
-  //         : '',
-  //       officeName: req.body.officeName,
-  //       officeId: req.body.officeId,
-  //     });
-  //     const routeNext = await DocumentRoute.findOne({
-  //       where: {
-  //         orderId: 1,
-  //         documentType: document.dataValues.documentType,
-  //       },
-  //     });
-  //     await DocumentOrderLog.create({
-  //       documentId: document.dataValues.id,
-  //       order: document.dataValues.order,
-  //       orderDescription: routeNext.dataValues.description,
-  //       statusDescription: 'Черновик',
-  //       personalNumber: req.user.id,
-  //       fullname: req.user.fullname,
-  //     });
-  //     return res.status(errors.success.code).json(document.dataValues);
-  //   } catch (e) {
-  //     console.log(e);
-  //     if (e instanceof ValidationError) {
-  //       return res.sendStatus(errors.badRequest.code);
-  //     }
-  //     return res.sendStatus(errors.internalServerError.code);
-  //   }
-  // }
+      const document = await this.documentRepository.create({
+        body: req.body.body,
+        documentType: type.id,
+        documentTypeDescription: type.description,
+        authorPersonalNumber: req.user.id,
+        authorFullname: req.user.fullname,
+        dateApplication: req.body.dateApplication,
+        statusId: 3,
+        order: 1,
+        permitionCurrent: route.permition,
+        permitionCurrentDesc: route.description,
+        documentTemplateID: req.body.documentTemplateID,
+        users: req.body.users,
+        usernames: req.body.users.map((u) => u.fullname).join(),
+        officeName: req.user.officeName,
+        officeId: req.user.officeId,
+      });
 
-  // async updateDocumentByDocumentId(req, res) {
-  //   try {
-  //     const document = await this.documentRepository.findByPk(
-  //       req.params.documentId,
-  //       {
-  //         include: [{ all: true, nested: true, duplicating: true }],
-  //       },
-  //     );
+      return res.status(errors.success.code).json(document.dataValues);
+    } catch (e) {
+      console.log(e.message);
+      if (e instanceof ValidationError) {
+        return res.sendStatus(errors.badRequest.code);
+      }
+      return res.sendStatus(errors.internalServerError.code);
+    }
+  }
 
-  //     const route = await DocumentRoute.findOne({
-  //       where: {
-  //         orderId: document.dataValues.order,
-  //         documentType: document.dataValues.documentType,
-  //       },
-  //       include: [{ all: true, nested: true, duplicating: true }],
-  //     });
+  async addNewDocumentInDraft(req, res) {
+    try {
+      const route = await this.documentRouteRepository.findOne({
+        where: {
+          orderId: 1,
+          documentType: req.body.documentType,
+        },
+      });
 
-  //     if (!route) {
-  //       return res.sendStatus(errors.forbidden.code);
-  //     }
-  //     if (
-  //       req.user.roles
-  //         .map((r) => r.idAccessCode)
-  //         .includes(route.dataValues.permition)
-  //     ) {
-  //       if (document.dataValues.statusId == 3 && req.body.agree) {
-  //         if (document.dataValues.order == 3) {
-  //           await document.update({
-  //             registrationNumber: req.body.registrationNumber,
-  //           });
-  //         }
-  //         if (document.dataValues.order < 4) {
-  //           const orderNext = document.dataValues.order + 1;
-  //           var routeNext = await DocumentRoute.findOne({
-  //             where: {
-  //               orderId: orderNext,
-  //               documentType: document.dataValues.documentType,
-  //             },
-  //           });
-  //           if (!route) {
-  //             return res.sendStatus(errors.notFound.code);
-  //           }
-  //           await document.update({
-  //             order: orderNext,
-  //             permitionCurrent: routeNext.dataValues.permition,
-  //             permitionCurrentDesc: routeNext.dataValues.description,
-  //           });
-  //         } else {
-  //           await document.increment('statusId', { by: 1 });
-  //           var routeNext = await DocumentRoute.findOne({
-  //             where: {
-  //               orderId: 4,
-  //               documentType: document.dataValues.documentType,
-  //             },
-  //           });
-  //         }
-  //       } else if (document.dataValues.statusId == 3 && !req.body.agree) {
-  //         var routeNext = await DocumentRoute.findOne({
-  //           where: {
-  //             orderId: 1,
-  //             documentType: document.dataValues.documentType,
-  //           },
-  //         });
-  //         if (!route) {
-  //           return res.sendStatus(errors.notFound.code);
-  //         }
-  //         await document.update({
-  //           statusId: 2,
-  //           order: 1,
-  //           permitionCurrent: routeNext.dataValues.permition,
-  //           permitionCurrentDesc: routeNext.dataValues.description,
-  //           message: req.body.message,
-  //           messageUserId: req.user.id,
-  //           messageUserFullname: req.user.fullname,
-  //         });
-  //       }
-  //       //для обновления статуса
-  //       const documentNew = await this.documentRepository.findByPk(
-  //         req.params.documentId,
-  //         {
-  //           include: [{ all: true, nested: true, duplicating: true }],
-  //         },
-  //       );
-  //       await DocumentOrderLog.create({
-  //         documentId: documentNew.dataValues.id,
-  //         order: documentNew.dataValues.order,
-  //         orderDescription: routeNext.dataValues.description,
-  //         statusDescription:
-  //           documentNew.dataValues.status.dataValues.description,
-  //         personalNumber: req.user.id,
-  //         fullname: req.user.fullname,
-  //         message: req.body.message,
-  //         registrationNumber: req.body.registrationNumber,
-  //       });
-  //       return res.status(errors.success.code).json(document);
-  //     }
-  //     return res.sendStatus(errors.forbidden.code);
-  //   } catch (e) {
-  //     console.log(e);
-  //     return res.sendStatus(errors.internalServerError.code);
-  //   }
-  // }
+      if (!route) {
+        return res.sendStatus(errors.notFound.code);
+      }
 
-  // async updateDocumentInfoForRole(req, res, next) {
-  //   try {
-  //     const document = await this.documentRepository.findByPk(
-  //       req.params.documentId,
-  //       {
-  //         include: [{ all: true, nested: true, duplicating: true }],
-  //       },
-  //     );
+      const type = await this.documentTypeRepository.findOne({
+        where: {
+          id: req.body.documentType,
+        },
+      });
 
-  //     await document.update({
-  //       dateApplication: req.body.dateApplication,
-  //       body: req.body.updatedDocument,
-  //       users: req.body.users,
-  //       officeName: req.body.officeName,
-  //       officeId: req.body.officeId,
-  //     });
-  //     return next();
-  //   } catch (e) {
-  //     console.log(e);
-  //     return res.sendStatus(errors.internalServerError.code);
-  //   }
-  // }
+      if (!type) {
+        return res.sendStatus(errors.notFound.code);
+      }
 
-  // async updateDocumentFromDraftAndRevisionByDocumentId(req, res) {
-  //   try {
-  //     const document = await this.documentRepository.findByPk(
-  //       req.params.documentId,
-  //       {
-  //         include: [{ all: true, nested: true, duplicating: true }],
-  //       },
-  //     );
-  //     if (!document) {
-  //       return res.sendStatus(errors.notFound.code);
-  //     }
-  //     const route = await DocumentRoute.findOne({
-  //       where: {
-  //         orderId: 1,
-  //         documentType: req.body.documentType,
-  //       },
-  //     });
-  //     if (!route) {
-  //       return res.sendStatus(errors.notFound.code);
-  //     }
-  //     if (
-  //       req.user.id == document.dataValues.authorPersonalNumber &&
-  //       !req.body.flagUpdateDraft
-  //     ) {
-  //       await document.update({
-  //         body: req.body.updatedDocument,
-  //         statusId: 3,
-  //         order: 1,
-  //         permitionCurrent: route.dataValues.permition,
-  //         permitionCurrentDesc: route.dataValues.description,
-  //         dateApplication: req.body.dateApplication,
-  //         documentTemplateID: req.body.documentTemplateID,
-  //         users: req.body.users,
-  //         officeName: req.body.officeName,
-  //         officeId: req.body.officeId,
-  //         documentType: req.body.documentType,
-  //       });
-  //       const documentUpdated = await this.documentRepository.findByPk(
-  //         req.params.documentId,
-  //         {
-  //           include: [{ all: true, nested: true, duplicating: true }],
-  //         },
-  //       );
-  //       const routeNext = await DocumentRoute.findOne({
-  //         where: {
-  //           orderId: 1,
-  //           documentType: document.dataValues.documentType,
-  //         },
-  //       });
-  //       await DocumentOrderLog.create({
-  //         documentId: documentUpdated.dataValues.id,
-  //         order: documentUpdated.dataValues.order,
-  //         orderDescription: routeNext.dataValues.description,
-  //         statusDescription:
-  //           documentUpdated.dataValues.status.dataValues.description,
-  //         personalNumber: req.user.id,
-  //         fullname: req.user.fullname,
-  //       });
-  //     }
-  //     if (req.body.flagUpdateDraft) {
-  //       await document.update({
-  //         body: req.body.updatedDocument,
-  //         permitionCurrent: route.dataValues.permition,
-  //         permitionCurrentDesc: route.dataValues.description,
-  //         dateApplication: req.body.dateApplication,
-  //         documentTemplateID: req.body.documentTemplateID,
-  //         users: req.body.users,
-  //         officeName: req.body.officeName,
-  //         officeId: req.body.officeId,
-  //         documentType: req.body.documentType,
-  //       });
-  //     }
-  //     return res.status(errors.success.code).json(document);
-  //   } catch (e) {
-  //     console.log(e);
-  //     return res.sendStatus(errors.internalServerError.code);
-  //   }
-  // }
+      const document = await this.documentRepository.create({
+        body: req.body.body,
+        documentType: type.id,
+        documentTypeDescription: type.description,
+        authorPersonalNumber: req.user.id,
+        authorFullname: req.user.fullname,
+        dateApplication: req.body.dateApplication,
+        statusId: 1,
+        order: 1,
+        permitionCurrent: route.permition,
+        permitionCurrentDesc: route.description,
+        documentTemplateID: req.body.documentTemplateID,
+        users: req.body.users,
+        usernames: req.body.users
+          ? req.body.users.map((u) => u.fullname).join(' ')
+          : '',
+        officeName: req.user.officeName,
+        officeId: req.user.officeId,
+      });
 
-  // async updateDocumentFlagDeleted(req, res) {
-  //   try {
-  //     const document = await this.documentRepository.findByPk(
-  //       req.params.documentId,
-  //       {
-  //         include: [{ all: true, nested: true, duplicating: true }],
-  //       },
-  //     );
-  //     if (!document) {
-  //       return res.sendStatus(errors.notFound.code);
-  //     }
-  //     await document.update({
-  //       dateApplication: req.body.dateApplication,
-  //       deletedDate: new Date(Date.now()),
-  //       flagDeleted: true,
-  //       deletedAuthorFullname: req.body.deletedAuthorFullname,
-  //       deletedAuthorPersonalNumber: req.body.deletedAuthorPersonalNumber,
-  //     });
-  //     return res.status(errors.success.code).json(document);
-  //   } catch (e) {
-  //     return res.sendStatus(errors.internalServerError.code);
-  //   }
-  // }
+      const routeNext = await this.documentRouteRepository.findOne({
+        where: {
+          orderId: 1,
+          documentType: document.documentType,
+        },
+      });
 
-  // async deleteAllDocuments(res) {
-  //   try {
-  //     this.documentRepository.destroy({
-  //       where: {},
-  //     });
-  //     return res.status(errors.success.code).json('delete all');
-  //   } catch (e) {
-  //     return res.sendStatus(errors.internalServerError.code);
-  //   }
-  // }
+      await this.documentOrderLogRepository.create({
+        documentId: document.id,
+        order: document.order,
+        orderDescription: routeNext.description,
+        statusDescription: 'Черновик',
+        personalNumber: req.user.id,
+        fullname: req.user.fullname,
+      });
+
+      return res.status(errors.success.code).json(document);
+    } catch (e) {
+      console.log(e.message);
+      if (e instanceof ValidationError) {
+        return res.sendStatus(errors.badRequest.code);
+      }
+      return res.sendStatus(errors.internalServerError.code);
+    }
+  }
+
+  async updateDocumentByDocumentId(req, res) {
+    try {
+      const document = await this.documentRepository.findByPk(
+        req.params.documentId,
+        {
+          include: [{ all: true, nested: true, duplicating: true }],
+        },
+      );
+
+      if (!document) return res.sendStatus(errors.notFound.code);
+
+      await document.update({
+        dateApplication: req.body.dateApplication,
+        body: req.body.updatedDocument,
+        users: req.body.users,
+        officeName: req.user.officeName,
+        officeId: req.user.officeId,
+      });
+
+      const route = await this.documentRouteRepository.findOne({
+        where: {
+          orderId: document.order,
+          documentType: document.documentType,
+        },
+
+        include: [{ all: true, nested: true, duplicating: true }],
+      });
+
+      if (!route)
+        return res
+          .sendStatus(errors.forbidden.code)
+          .send('Не найден DocumentRoute');
+
+      let routeNext;
+      if (req.user.roles.map((r) => r.idAccessCode).includes(route.permition)) {
+        if (document.statusId == 3 && req.body.agree) {
+          if (document.order == 3) {
+            await document.update({
+              registrationNumber: req.body.registrationNumber,
+            });
+          }
+
+          if (document.order < 4) {
+            const orderNext = document.order + 1;
+            routeNext = await this.documentRouteRepository.findOne({
+              where: {
+                orderId: orderNext,
+                documentType: document.documentType,
+              },
+            });
+
+            await document.update({
+              order: orderNext,
+              permitionCurrent: routeNext.permition,
+              permitionCurrentDesc: routeNext.description,
+            });
+          } else {
+            await document.increment('statusId', { by: 1 });
+            routeNext = await this.documentRouteRepository.findOne({
+              where: {
+                orderId: 4,
+                documentType: document.documentType,
+              },
+            });
+
+            if (!routeNext) return res.sendStatus(errors.notFound.code);
+          }
+        } else if (document.statusId == 3 && !req.body.agree) {
+          routeNext = await this.documentRouteRepository.findOne({
+            where: {
+              orderId: 1,
+              documentType: document.documentType,
+            },
+          });
+
+          if (!routeNext) return res.sendStatus(errors.notFound.code);
+
+          await document.update({
+            statusId: 2,
+            order: 1,
+            permitionCurrent: routeNext.permition,
+            permitionCurrentDesc: routeNext.description,
+            message: req.body.message,
+            messageUserId: req.user.id,
+            messageUserFullname: req.user.fullname,
+          });
+        }
+
+        if (!routeNext) return res.sendStatus(errors.notFound.code);
+
+        const documentNew = await this.documentRepository.findByPk(
+          req.params.documentId,
+          {
+            include: [{ all: true, nested: true, duplicating: true }],
+          },
+        );
+
+        await this.documentOrderLogRepository.create({
+          documentId: documentNew.id,
+          order: documentNew.order,
+          orderDescription: routeNext.description,
+          statusDescription: documentNew.status.description,
+          personalNumber: req.user.id,
+          fullname: req.user.fullname,
+          message: req.body.message,
+          registrationNumber: req.body.registrationNumber,
+        });
+        return res.status(errors.success.code).json(document);
+      }
+
+      return res.sendStatus(errors.forbidden.code);
+    } catch (e) {
+      console.log(e.message);
+      return res.sendStatus(errors.internalServerError.code);
+    }
+  }
+
+  async updateDocumentInfoForRole(req, res) {
+    try {
+      const document = await this.documentRepository.findByPk(
+        req.params.documentId,
+        {
+          include: [{ all: true, nested: true, duplicating: true }],
+        },
+      );
+
+      if (!document) return res.sendStatus(errors.notFound.code);
+
+      await document.update({
+        dateApplication: req.body.dateApplication,
+        body: req.body.updatedDocument,
+        users: req.body.users,
+        officeName: req.user.officeName,
+        officeId: req.user.officeId,
+      });
+
+      return res.status(errors.success.code).json(document);
+    } catch (e) {
+      console.log(e.message);
+      return res.sendStatus(errors.internalServerError.code);
+    }
+  }
+
+  async updateDocumentFromDraftAndRevisionByDocumentId(req, res) {
+    try {
+      const document = await this.documentRepository.findByPk(
+        req.params.documentId,
+        {
+          include: [{ all: true, nested: true, duplicating: true }],
+        },
+      );
+
+      if (!document) return res.sendStatus(errors.notFound.code);
+
+      const route = await this.documentRouteRepository.findOne({
+        where: {
+          orderId: 1,
+          documentType: req.body.documentType,
+        },
+      });
+
+      if (!route) return res.sendStatus(errors.notFound.code);
+
+      if (
+        req.user.id == document.authorPersonalNumber &&
+        !req.body.flagUpdateDraft
+      ) {
+        await document.update({
+          body: req.body.updatedDocument,
+          statusId: 3,
+          order: 1,
+          permitionCurrent: route.permition,
+          permitionCurrentDesc: route.description,
+          dateApplication: req.body.dateApplication,
+          documentTemplateID: req.body.documentTemplateID,
+          users: req.body.users,
+          officeName: req.user.officeName,
+          officeId: req.user.officeId,
+          documentType: req.body.documentType,
+        });
+
+        const documentUpdated = await this.documentRepository.findByPk(
+          req.params.documentId,
+          {
+            include: [{ all: true, nested: true, duplicating: true }],
+          },
+        );
+
+        const routeNext = await DocumentRoute.findOne({
+          where: {
+            orderId: 1,
+            documentType: document.documentType,
+          },
+        });
+
+        await DocumentOrderLog.create({
+          documentId: documentUpdated.id,
+          order: documentUpdated.order,
+          orderDescription: routeNext.description,
+          statusDescription: documentUpdated.status.description,
+          personalNumber: req.user.id,
+          fullname: req.user.fullname,
+        });
+      }
+
+      if (req.body.flagUpdateDraft) {
+        await document.update({
+          body: req.body.updatedDocument,
+          permitionCurrent: route.permition,
+          permitionCurrentDesc: route.description,
+          dateApplication: req.body.dateApplication,
+          documentTemplateID: req.body.documentTemplateID,
+          users: req.body.users,
+          officeName: req.user.officeName,
+          officeId: req.user.officeId,
+          documentType: req.body.documentType,
+        });
+      }
+
+      return res.status(errors.success.code).json(document);
+    } catch (e) {
+      console.log(e.message);
+      return res.sendStatus(errors.internalServerError.code);
+    }
+  }
+
+  async updateDocumentFlagDeleted(req, res) {
+    try {
+      const document = await this.documentRepository.findByPk(
+        req.params.documentId,
+        {
+          include: [{ all: true, nested: true, duplicating: true }],
+        },
+      );
+
+      if (!document) return res.sendStatus(errors.notFound.code);
+
+      await document.update({
+        dateApplication: req.body.dateApplication,
+        deletedDate: new Date(Date.now()),
+        flagDeleted: true,
+        deletedAuthorFullname: req.body.deletedAuthorFullname,
+        deletedAuthorPersonalNumber: req.body.deletedAuthorPersonalNumber,
+      });
+
+      return res.status(errors.success.code).json(document);
+    } catch (e) {
+      return res.sendStatus(errors.internalServerError.code);
+    }
+  }
+
+  async deleteAllDocuments(res) {
+    try {
+      this.documentRepository.destroy({
+        where: {},
+      });
+
+      return res.status(errors.success.code).json('deleted all');
+    } catch (e) {
+      return res.sendStatus(errors.internalServerError.code);
+    }
+  }
 }

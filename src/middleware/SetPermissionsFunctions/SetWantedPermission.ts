@@ -33,17 +33,28 @@ export default async function setWantedPermission(req) {
 
   const routerPermissions = getRouterPermissions(routerPath)[path];
 
-  const permissions = {
-    roles: routerPermissions
-      .filter((p) => p.role !== undefined)
-      .map((p) => ({ role: p.role, officeCheck: p.officeCheck })),
-    field: routerPermissions
-      .filter((p) => p.field !== undefined)
-      .map((p) => p.field)[0],
-    authenticated: null,
-  };
+  const permissions = {};
 
-  permissions.authenticated = !permissions.roles.length && !permissions.field;
+  permissions['roles'] = routerPermissions
+    .filter((p) => p.role != undefined)
+    .map((p) => ({ role: p.role, officeCheck: p.officeCheck }));
+
+  permissions['field'] = routerPermissions
+    .filter((p) => p.field != undefined)
+    .map((p) => p.field);
+
+  permissions['field'] = permissions['field']?.[0] ?? undefined;
+
+  if (permissions['roles'].length == 0 && permissions['field'] == undefined) {
+    permissions['authenticated'] = routerPermissions.find(
+      (p) => p.authenticated != undefined,
+    );
+
+    permissions['authenticated'] =
+      permissions['authenticated']?.authenticated ?? false;
+  } else {
+    permissions['authenticated'] = true;
+  }
 
   req.permissions = permissions;
   // ===> setUserToRequest
