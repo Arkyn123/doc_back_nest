@@ -30,6 +30,7 @@ export class ReportService {
       });
 
       let values = [];
+
       documents.map((m) =>
         values.push({
           officeName: m.officeName,
@@ -38,13 +39,17 @@ export class ReportService {
           date: m.dateApplication,
         }),
       );
+
       const os = { 1: 0, 2: 0, 3: 0, 4: 0 };
+
       const count = values.reduce((acc, n) => {
         (acc[n.officeName] || (acc[n.officeName] = { ...os }))[n.status]++;
         return acc;
       }, {});
+
       return res.status(errors.success.code).json(count);
-    } catch (error) {
+    } catch (e) {
+      console.warn(e);
       res.sendStatus(errors.internalServerError.code);
     }
   }

@@ -185,7 +185,7 @@ export class DocumentService {
 
       return res.status(errors.success.code).json(documents);
     } catch (e) {
-      console.warn(e.message);
+      console.warn(e);
       return res.sendStatus(errors.internalServerError.code);
     }
   }
@@ -209,7 +209,7 @@ export class DocumentService {
 
       return res.status(errors.success.code).json({ document, route });
     } catch (e) {
-      console.log(e.message);
+      console.warn(e);
       return res.sendStatus(errors.internalServerError.code);
     }
   }
@@ -254,7 +254,7 @@ export class DocumentService {
 
       return res.status(errors.success.code).json(document.dataValues);
     } catch (e) {
-      console.log(e.message);
+      console.warn(e);
       if (e instanceof ValidationError) {
         return res.sendStatus(errors.badRequest.code);
       }
@@ -323,7 +323,7 @@ export class DocumentService {
 
       return res.status(errors.success.code).json(document);
     } catch (e) {
-      console.log(e.message);
+      console.warn(e);
       if (e instanceof ValidationError) {
         return res.sendStatus(errors.badRequest.code);
       }

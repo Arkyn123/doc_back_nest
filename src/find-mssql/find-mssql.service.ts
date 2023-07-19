@@ -28,9 +28,10 @@ export class FindMssqlService {
           join [T_XXHR_OSK_ASSIGNMENTS_V] c on a.ORG_ID=c.ORG_ID
           where (b.DATE_TO > GETDATE()) and (a.POSITION_ID like '%${req.query.position}%' or a.POSITION_NAME like '%${req.query.position}%') 
     `);
+
       return res.status(errors.success.code).json(results);
     } catch (e) {
-      console.log(e);
+      console.warn(e);
       return res.sendStatus(errors.internalServerError.code);
     }
   }
@@ -40,9 +41,10 @@ export class FindMssqlService {
       const [results, metadata] = await databaseMSSQL.query(
         `SELECT distinct WORK_SCHEDULE_ID, CODE as SCHEDULE, NAME from T_XXHR_WORK_SCHEDULES WHERE CODE LIKE '%${req.query.brigada}%'`,
       );
+
       return res.status(errors.success.code).json(results);
     } catch (e) {
-      console.log(e);
+      console.warn(e);
       return res.sendStatus(errors.internalServerError.code);
     }
   }
@@ -54,9 +56,10 @@ export class FindMssqlService {
           WORK_SCHEDULE_ID: req.query.brigades,
         },
       });
+
       return res.status(errors.success.code).json(brigades);
     } catch (e) {
-      console.log(e);
+      console.warn(e);
       return res.sendStatus(errors.internalServerError.code);
     }
   }

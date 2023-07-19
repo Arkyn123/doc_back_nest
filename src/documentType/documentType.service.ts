@@ -15,17 +15,21 @@ export class DocumentTypeService {
       const documentTypes = await this.documentTypeRepository.findAll({
         include: [{ all: true, nested: true, duplicating: true }],
       });
+
       return res.status(errors.success.code).json(documentTypes);
     } catch (e) {
+      console.warn(e);
       return res.sendStatus(errors.internalServerError.code);
     }
   }
+
   async addNewDocumentType(req, res) {
     try {
       const result = await this.documentTypeRepository.upsert({ ...req.body });
-      return res.status(errors.success.code).json(result); //result.dataValues
+
+      return res.status(errors.success.code).json(result);
     } catch (e) {
-      console.log(e);
+      console.warn(e);
       if (e instanceof ValidationError) {
         return res.sendStatus(errors.badRequest.code);
       }

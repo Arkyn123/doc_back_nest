@@ -1,6 +1,6 @@
 export const config = {
   development: {
-    port: 3000,
+    port: 5000,
     database: {
       username: 'postgres',
       password: 'root',
@@ -9,14 +9,6 @@ export const config = {
       port: 5432,
       dialect: 'postgres',
     },
-    // databaseMSSQL: {
-    //   username: 'postgres',
-    //   password: 'root',
-    //   database: 'documents',
-    //   host: 'localhost',
-    //   port: 5432,
-    //   dialect: 'postgres',
-    // },
     databaseMSSQL: {
       username: 'webuser',
       password: 'G745JRQ8!',

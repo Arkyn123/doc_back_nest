@@ -24,17 +24,6 @@ export class DocumentFileService {
     }
   }
 
-  async addNewFile(req, res) {
-    try {
-      const newFile = await this.documentFileRepository.create({
-        ...req.body,
-      });
-      return res.status(errors.success.code).json(newFile);
-    } catch (error) {
-      res.sendStatus(errors.internalServerError.code);
-    }
-  }
-
   async getFileById(req, res) {
     try {
       const file = await this.documentFileRepository.findAll({
@@ -43,8 +32,23 @@ export class DocumentFileService {
           statusDelete: false,
         },
       });
+
       return res.status(errors.success.code).json(file);
     } catch (error) {
+      res.sendStatus(errors.internalServerError.code);
+    }
+  }
+
+  async addNewFile(req, res) {
+    try {
+      const newFile = await this.documentFileRepository.create({
+        ...req.body,
+      });
+
+      return res.status(errors.success.code).json(newFile);
+    } catch (error) {
+      console.log(error.message);
+
       res.sendStatus(errors.internalServerError.code);
     }
   }
@@ -56,8 +60,9 @@ export class DocumentFileService {
           id: req.params.id,
         },
       });
-      console.log(file);
+
       await file.update({ statusDelete: true });
+
       return res.status(errors.success.code).json(file.id);
     } catch (error) {
       res.sendStatus(errors.internalServerError.code);

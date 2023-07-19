@@ -16,9 +16,10 @@ export class DocumentRouteService {
       const documentRoutes = await this.documentRouteRepository.findAll({
         include: [{ all: true, nested: true, duplicating: true }],
       });
+
       return res.status(errors.success.code).json(documentRoutes);
     } catch (e) {
-      console.log(e);
+      console.warn(e);
       return res.sendStatus(errors.internalServerError.code);
     }
   }
@@ -34,6 +35,7 @@ export class DocumentRouteService {
 
       return res.status(errors.success.code).json(documentRoutes);
     } catch (e) {
+      console.warn(e);
       return res.sendStatus(errors.internalServerError.code);
     }
   }
@@ -41,9 +43,10 @@ export class DocumentRouteService {
   async addNewDocumentRoute(req, res) {
     try {
       const result = await this.documentRouteRepository.create({ ...req.body });
-      return res.status(errors.success.code).json(result.dataValues);
+
+      return res.status(errors.success.code).json(result);
     } catch (e) {
-      console.log(e);
+      console.warn(e);
       if (e instanceof ValidationError) {
         return res.sendStatus(errors.badRequest.code);
       }
@@ -56,13 +59,14 @@ export class DocumentRouteService {
       const result = await this.documentRouteRepository.findByPk(
         req.params.documentTypeId,
       );
-      if (!result) {
-        return res.sendStatus(errors.notFound.code);
-      }
+
+      if (!result) return res.sendStatus(errors.notFound.code);
+
       await result.destroy();
+
       return res.sendStatus(errors.success.code);
     } catch (e) {
-      console.log(e);
+      console.warn(e);
       return res.sendStatus(errors.internalServerError.code);
     }
   }

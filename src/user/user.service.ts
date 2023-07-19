@@ -6,8 +6,8 @@ export class UserService {
   async getUser(req, res) {
     return res.status(errors.success.code).json({
       user: req.user,
-      roles: req.roles,
-      officeId: req.officeId,
+      roles: req.user.roles,
+      officeId: req.user.officeId,
     });
   }
 }

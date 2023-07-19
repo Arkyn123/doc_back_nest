@@ -14,8 +14,10 @@ export class DocumentStatusService {
   async getAllStatuses(req, res) {
     try {
       const statuses = await this.documentStatusRepository.findAll();
+
       return res.status(errors.success.code).json(statuses);
     } catch (e) {
+      console.warn(e);
       return res.sendStatus(errors.internalServerError.code);
     }
   }
@@ -24,8 +26,10 @@ export class DocumentStatusService {
       const result = await this.documentStatusRepository.create({
         ...req.body,
       });
-      return res.status(errors.success.code).json(result.dataValues);
+
+      return res.status(errors.success.code).json(result);
     } catch (e) {
+      console.warn(e);
       if (e instanceof ValidationError) {
         return res.sendStatus(errors.badRequest.code);
       }
