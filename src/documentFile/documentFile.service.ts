@@ -11,15 +11,16 @@ export class DocumentFileService {
 
   async getFiles(req, res) {
     try {
-      const files = await this.documentFileRepository.findAll({
+      const file = await this.documentFileRepository.findAll({
         include: [{ all: true, nested: true, duplicating: true }],
         where: { statusDelete: false },
       });
 
       return res
         .status(errors.success.code)
-        .json(files.map((e) => e.documentId));
-    } catch (error) {
+        .json(file.map((e) => e.documentId));
+    } catch (e) {
+      console.warn(e);
       res.sendStatus(errors.internalServerError.code);
     }
   }
@@ -34,21 +35,21 @@ export class DocumentFileService {
       });
 
       return res.status(errors.success.code).json(file);
-    } catch (error) {
+    } catch (e) {
+      console.warn(e);
       res.sendStatus(errors.internalServerError.code);
     }
   }
 
   async addNewFile(req, res) {
     try {
-      const newFile = await this.documentFileRepository.create({
+      const file = await this.documentFileRepository.create({
         ...req.body,
       });
 
-      return res.status(errors.success.code).json(newFile);
-    } catch (error) {
-      console.log(error.message);
-
+      return res.status(errors.success.code).json(file);
+    } catch (e) {
+      console.warn(e);
       res.sendStatus(errors.internalServerError.code);
     }
   }
@@ -64,7 +65,8 @@ export class DocumentFileService {
       await file.update({ statusDelete: true });
 
       return res.status(errors.success.code).json(file.id);
-    } catch (error) {
+    } catch (e) {
+      console.warn(e);
       res.sendStatus(errors.internalServerError.code);
     }
   }

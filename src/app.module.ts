@@ -32,8 +32,8 @@ import { DocumentOrderLogModule } from './documentOrderLog/documentOrderLog.modu
 
 @Module({
   imports: [
-    // databaseMssqlModule,
-    databasePgModule,
+    databaseMssqlModule,
+    // databasePgModule,
     UserModule,
     DocumentModule,
     ReportModule,

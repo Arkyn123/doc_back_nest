@@ -42,11 +42,17 @@ export class DocumentRouteService {
 
   async addNewDocumentRoute(req, res) {
     try {
-      const result = await this.documentRouteRepository.create({ ...req.body });
+      const { id: ownerId, fullname: ownerFullname } = req.user;
 
-      return res.status(errors.success.code).json(result);
+      const documentRoutes = await this.documentRouteRepository.create({
+        ...req.body,
+        ownerId,
+        ownerFullname,
+      });
+
+      return res.status(errors.success.code).json(documentRoutes);
     } catch (e) {
-      console.warn(e);
+      console.warn(e.message);
       if (e instanceof ValidationError) {
         return res.sendStatus(errors.badRequest.code);
       }
@@ -56,13 +62,13 @@ export class DocumentRouteService {
 
   async deleteDocumentRouteById(req, res) {
     try {
-      const result = await this.documentRouteRepository.findByPk(
+      const documentRoutes = await this.documentRouteRepository.findByPk(
         req.params.documentTypeId,
       );
 
-      if (!result) return res.sendStatus(errors.notFound.code);
+      if (!documentRoutes) return res.sendStatus(errors.notFound.code);
 
-      await result.destroy();
+      await documentRoutes.destroy();
 
       return res.sendStatus(errors.success.code);
     } catch (e) {

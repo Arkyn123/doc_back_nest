@@ -21,15 +21,20 @@ export class DocumentStatusService {
       return res.sendStatus(errors.internalServerError.code);
     }
   }
+
   async addNewStatus(req, res) {
     try {
+      const { id: ownerId, fullname: ownerFullname } = req.user;
+
       const result = await this.documentStatusRepository.create({
+        ownerId,
+        ownerFullname,
         ...req.body,
       });
 
       return res.status(errors.success.code).json(result);
     } catch (e) {
-      console.warn(e);
+      console.warn(e.message);
       if (e instanceof ValidationError) {
         return res.sendStatus(errors.badRequest.code);
       }

@@ -4,22 +4,16 @@ import {
   Post,
   Put,
   Delete,
-  Param,
-  Body,
   UseGuards,
-  Query,
   Res,
   Req,
-  Next,
 } from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { DocumentDTO } from './dto/DocumentDTO';
 import { UpdateDocumentDTO } from './dto/updateDocumentDTO';
 
-import { MyGuard } from '../guards/guard';
 import { PermGuard } from '../guards/permGuard';
 
-@UseGuards(MyGuard)
 @Controller('document')
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}

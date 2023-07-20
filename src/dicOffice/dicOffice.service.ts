@@ -39,10 +39,10 @@ export class DicOfficeService {
         CreatedDate: Date.now(),
         FlagDeleted: false,
       });
-
       return res.status(errors.success.code).json(dic_office);
     } catch (e) {
       console.warn(e);
+
       return res.sendStatus(errors.internalServerError.code);
     }
   }

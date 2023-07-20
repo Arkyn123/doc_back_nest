@@ -32,10 +32,9 @@ export default async function setRolesToRequest(req, res) {
       }),
     });
 
-    const userDataFromGraphQL = (await response.json()).data;
-
-    let roles = userDataFromGraphQL.Workers[0].permissions;
-    const office = userDataFromGraphQL.Workers[0].positions[0].office;
+    const { permissions, positions } = (await response.json()).data.Workers[0];
+    const roles = permissions;
+    const { office } = positions[0];
 
     const adminUser = [184184];
 
@@ -48,23 +47,14 @@ export default async function setRolesToRequest(req, res) {
 
     if (roles.some((role) => role.idAccessCode == 'UEMI_ADMIN')) {
       roles.push(
-        {
-          idAccessCode: 'SDM_SECRETARY_CHECK',
-          idOffice: null,
-        },
+        { idAccessCode: 'SDM_SECRETARY_CHECK', idOffice: null },
         { idAccessCode: 'SDM_LABOR_CHECK', idOffice: null },
-        {
-          idAccessCode: 'SDM_SECRETARY_REGISTRATION',
-          idOffice: null,
-        },
-        {
-          idAccessCode: 'SDM_LABOR_REGISTRATION',
-          idOffice: null,
-        },
+        { idAccessCode: 'SDM_SECRETARY_REGISTRATION', idOffice: null },
+        { idAccessCode: 'SDM_LABOR_REGISTRATION', idOffice: null },
       );
     }
 
-    roles = roles.filter(
+    const uniqueRoles = roles.filter(
       (obj, index, self) =>
         index ===
         self.findIndex(
@@ -73,12 +63,13 @@ export default async function setRolesToRequest(req, res) {
         ),
     );
 
-    req.user.roles = roles;
+    req.user.roles = uniqueRoles;
     req.user.officeId = office.id;
     req.user.officeName = office.name;
 
     // ===> CheckPermissions
-  } catch (error) {
+  } catch (e) {
+    console.warn(e);
     return res.sendStatus(errors.badRequest.code);
   }
 }

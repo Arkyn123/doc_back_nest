@@ -25,11 +25,13 @@ export class DocumentTypeService {
 
   async addNewDocumentType(req, res) {
     try {
-      const result = await this.documentTypeRepository.upsert({ ...req.body });
+      const documentType = await this.documentTypeRepository.upsert({
+        ...req.body,
+      });
 
-      return res.status(errors.success.code).json(result);
+      return res.status(errors.success.code).json(documentType);
     } catch (e) {
-      console.warn(e);
+      console.warn(e.message);
       if (e instanceof ValidationError) {
         return res.sendStatus(errors.badRequest.code);
       }

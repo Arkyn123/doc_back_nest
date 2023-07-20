@@ -2,24 +2,20 @@ import { config } from 'src/utils/config';
 import errors from 'src/utils/errors';
 import fetch from 'node-fetch';
 
-//Форматирование имени (ИВАНОВ ИВАН ИВАНОВИЧ => Иванов Иван Иванович)
-const camelCase = (rawWord) => {
+const formatName = (rawWord) => {
   return rawWord
     .trim()
     .split(' ')
-    .map((w) => w.toLowerCase())
-    .map((w) => (w = w[0].toUpperCase() + w.substring(1)))
+    .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
     .join(' ');
 };
 
 export default async function setUserToRequest(req, res) {
-  if (!req.permissions.authenticated) {
-    return;
-  }
+  if (!req.permissions.authenticated) return;
 
-  if (!req.headers.authorization) {
-    return res.sendStatus(errors.unauthorized.code);
-  }
+  const authorizationHeader = req.headers.authorization;
+
+  if (!authorizationHeader) return res.sendStatus(errors.unauthorized.code);
 
   try {
     const response = await fetch(
@@ -30,7 +26,7 @@ export default async function setUserToRequest(req, res) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          token: req.headers.authorization.split(' ')[1],
+          token: authorizationHeader.split(' ')[1],
         }),
       },
     );
@@ -38,12 +34,12 @@ export default async function setUserToRequest(req, res) {
     const userFromService = await response.json();
 
     const user = {
-      id: parseInt(userFromService.emp, 10),
-      fullname: camelCase(userFromService.FIO),
+      id: userFromService.emp,
+      fullname: formatName(userFromService.FIO),
     };
 
     req.user = user;
-    req.user.token = req.headers.authorization.split(' ')[1];
+    req.user.token = authorizationHeader.split(' ')[1];
 
     // ===> SetRolesToRequest
   } catch (error) {

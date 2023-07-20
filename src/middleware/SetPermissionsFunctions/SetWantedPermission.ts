@@ -2,59 +2,43 @@ import { config } from '../../utils/config';
 
 const getRouterPermissions = (path) => {
   let permissions = require('../../utils/permissions');
-
-  path.forEach((item) => {
-    permissions = permissions[item];
-  });
-
-  return permissions;
+  return path.reduce((acc, item) => acc[item], permissions);
 };
 
 export default async function setWantedPermission(req) {
-  let url = req.originalUrl;
-  let parts = url.split('/');
-  url = parts.slice(0, 2).join('/');
-
+  const url = req.originalUrl;
+  const parts = url.split('/');
   const routerPath = [
     config[process.env.NODE_ENV].server.urlPrefix,
-    ...url.split('/').filter((item) => item !== '' && isNaN(item)),
+    ...parts.slice(0, 2).filter((item) => item !== '' && isNaN(item)),
   ];
 
-  let path = req.route.path;
-  path = path.replace(/\*/g, '');
+  let path = req.route.path.replace(/\*/g, '');
 
-  routerPath.forEach((item) => {
+  path = routerPath.reduce((acc, item) => {
     const regex = new RegExp(`/${item}`, 'g');
-    path = path.replace(regex, '');
-  });
+    return acc.replace(regex, '');
+  }, path);
 
   if (path === '') path = '/';
+
   console.log(routerPath, path);
 
   const routerPermissions = getRouterPermissions(routerPath)[path];
 
-  const permissions = {};
+  const permissions = {
+    roles: routerPermissions
+      .filter((p) => p.role !== undefined)
+      .map((p) => ({ role: p.role, officeCheck: p.officeCheck })),
+    field: routerPermissions.find((p) => p.field !== undefined)?.field,
+  };
 
-  permissions['roles'] = routerPermissions
-    .filter((p) => p.role != undefined)
-    .map((p) => ({ role: p.role, officeCheck: p.officeCheck }));
-
-  permissions['field'] = routerPermissions
-    .filter((p) => p.field != undefined)
-    .map((p) => p.field);
-
-  permissions['field'] = permissions['field']?.[0] ?? undefined;
-
-  if (permissions['roles'].length == 0 && permissions['field'] == undefined) {
-    permissions['authenticated'] = routerPermissions.find(
-      (p) => p.authenticated != undefined,
-    );
-
-    permissions['authenticated'] =
-      permissions['authenticated']?.authenticated ?? false;
-  } else {
-    permissions['authenticated'] = true;
-  }
+  const authenticatedPermission = routerPermissions.find(
+    (p) => p.authenticated !== undefined,
+  );
+  permissions['authenticated'] = authenticatedPermission
+    ? authenticatedPermission.authenticated
+    : !!(permissions.roles.length || permissions.field);
 
   req.permissions = permissions;
   // ===> setUserToRequest
