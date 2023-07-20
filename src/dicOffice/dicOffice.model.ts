@@ -1,7 +1,17 @@
 import { Column, Model, Table, DataType, HasMany } from 'sequelize-typescript';
-import { DicOfficeCorrespondence } from '../dicOfficeCorrespondence/dicOfficeCorrespondence.model';
 
-@Table({ tableName: 'DIC_OFFICE', schema: 'dbo', timestamps: false })
+@Table({
+  tableName: 'DIC_OFFICE',
+  schema: 'dbo',
+  timestamps: false,
+  indexes: [
+    {
+      name: 'PK_DIC_OFFICE',
+      unique: true,
+      fields: ['ID'],
+    },
+  ],
+})
 export class DicOffice extends Model<DicOffice> {
   @Column({
     type: DataType.INTEGER,
@@ -34,7 +44,4 @@ export class DicOffice extends Model<DicOffice> {
 
   @Column({ type: DataType.BOOLEAN, allowNull: true })
   FlagDeleted: boolean;
-
-  @HasMany(() => DicOfficeCorrespondence, 'OFFICE_ID')
-  CORRESPONDENCE: DicOfficeCorrespondence[];
 }

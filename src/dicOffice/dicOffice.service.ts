@@ -41,7 +41,7 @@ export class DicOfficeService {
       });
       return res.status(errors.success.code).json(dic_office);
     } catch (e) {
-      console.warn(e);
+      console.warn(e.message);
 
       return res.sendStatus(errors.internalServerError.code);
     }

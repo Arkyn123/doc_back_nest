@@ -1,4 +1,10 @@
-import { Column, Model, Table, DataType } from 'sequelize-typescript';
+import {
+  Column,
+  Model,
+  Table,
+  DataType,
+  ForeignKey,
+} from 'sequelize-typescript';
 
 @Table({
   tableName: 'DIC_OFFICE_CORRESPONDENCE',
@@ -8,7 +14,7 @@ import { Column, Model, Table, DataType } from 'sequelize-typescript';
 export class DicOfficeCorrespondence extends Model<DicOfficeCorrespondence> {
   @Column({
     type: DataType.INTEGER,
-    allowNull: false,
+    allowNull: true,
     primaryKey: true,
     autoIncrement: true,
   })
@@ -29,16 +35,12 @@ export class DicOfficeCorrespondence extends Model<DicOfficeCorrespondence> {
   @Column({
     type: DataType.INTEGER,
     allowNull: true,
-    references: {
-      model: 'DIC_OFFICE',
-      key: 'ID',
-    },
   })
   OFFICE_ID: number;
 
   @Column({
     type: DataType.DATE,
-    allowNull: true,
+    allowNull: false,
   })
   CreatedDate: Date;
 

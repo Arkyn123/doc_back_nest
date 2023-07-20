@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { DicOffice } from 'src/dicOffice/dicOffice.model';
 import { DicOfficeCorrespondence } from 'src/dicOfficeCorrespondence/dicOfficeCorrespondence.model';
-import { T_XXHR_SCHEDULE_BRIGADES } from 'src/find-mssql/T_XXHR_SCHEDULE_BRIGADES.model';
+import { T_XXHR_SCHEDULE_BRIGADES_V } from '../find-mssql/T_XXHR_SCHEDULE_BRIGADES_V.model';
+import { T_XXHR_OSK_ORG_HIERARHY_V } from '../find-mssql/T_XXHR_OSK_ORG_HIERARHY_V.model';
+import { T_XXHR_OSK_ASSIGNMENTS_V } from '../find-mssql/T_XXHR_OSK_ASSIGNMENTS_V.model';
 import { config } from 'src/utils/config';
 
 @Module({
@@ -16,7 +18,13 @@ import { config } from 'src/utils/config';
       database: config[process.env.NODE_ENV].databaseMSSQL.database,
       autoLoadModels: true,
       synchronize: false,
-      models: [DicOffice, DicOfficeCorrespondence, T_XXHR_SCHEDULE_BRIGADES],
+      models: [
+        DicOffice,
+        DicOfficeCorrespondence,
+        T_XXHR_SCHEDULE_BRIGADES_V,
+        T_XXHR_OSK_ORG_HIERARHY_V,
+        T_XXHR_OSK_ASSIGNMENTS_V,
+      ],
     }),
   ],
   controllers: [],

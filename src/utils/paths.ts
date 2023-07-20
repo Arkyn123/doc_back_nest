@@ -48,6 +48,7 @@ const setPermissionsPaths = [
 
   { path: 'user', method: RequestMethod.GET },
 ];
+
 const setPermissionsPathsPlusSequelizeFiltering = [
   { path: 'dicOffice', method: RequestMethod.GET },
 
