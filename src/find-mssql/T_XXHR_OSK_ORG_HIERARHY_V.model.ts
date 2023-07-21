@@ -7,7 +7,9 @@ import {
   BelongsTo,
   ForeignKey,
 } from 'sequelize-typescript';
-import { T_XXHR_SCHEDULE_BRIGADES_V } from './T_XXHR_SCHEDULE_BRIGADES_V.model';
+import { T_XXHR_SCHEDULE_BRIGADES } from './T_XXHR_SCHEDULE_BRIGADES.model';
+import { T_XXHR_OSK_POSITIONS } from './T_XXHR_OSK_POSITIONS.model';
+import { T_XXHR_OSK_ASSIGNMENTS_V } from './T_XXHR_OSK_ASSIGNMENTS_V.model';
 
 @Table({
   tableName: 'T_XXHR_OSK_ORG_HIERARHY_V',
@@ -33,9 +35,6 @@ export class T_XXHR_OSK_ORG_HIERARHY_V extends Model<T_XXHR_OSK_ORG_HIERARHY_V> 
   @Column({ type: DataType.NUMBER, allowNull: true })
   SEQUENTIAL_NUMBER: number;
 
-  @Column({ type: DataType.NUMBER, allowNull: true })
-  ORGANIZATION_ID_PARENT: number;
-
   @Column({
     type: DataType.STRING(80),
     allowNull: true,
@@ -51,10 +50,10 @@ export class T_XXHR_OSK_ORG_HIERARHY_V extends Model<T_XXHR_OSK_ORG_HIERARHY_V> 
   @Column({ type: DataType.DATE, allowNull: false })
   update_date: Date;
 
-  @ForeignKey(() => T_XXHR_SCHEDULE_BRIGADES_V)
-  @Column
+  @ForeignKey(() => T_XXHR_OSK_POSITIONS)
+  @Column({ type: DataType.NUMBER, allowNull: true })
   ORGANIZATION_ID: number;
 
-  @HasMany(() => T_XXHR_SCHEDULE_BRIGADES_V)
-  organizations: T_XXHR_SCHEDULE_BRIGADES_V[];
+  @BelongsTo(() => T_XXHR_OSK_POSITIONS, 'ORGANIZATION_ID')
+  orgHierarchy: T_XXHR_OSK_ORG_HIERARHY_V;
 }
