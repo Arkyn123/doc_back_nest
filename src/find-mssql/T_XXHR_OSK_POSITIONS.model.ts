@@ -38,5 +38,5 @@ export class T_XXHR_OSK_POSITIONS extends Model<T_XXHR_OSK_POSITIONS> {
   orgHierarchy: T_XXHR_OSK_ORG_HIERARHY_V;
 
   @BelongsTo(() => T_XXHR_OSK_ASSIGNMENTS_V, 'POSITION_ID')
-  assignment: T_XXHR_OSK_ASSIGNMENTS_V;
+  assignments: T_XXHR_OSK_ASSIGNMENTS_V;
 }

@@ -17,52 +17,6 @@ export class FindMssqlService {
 
   async getAllSchedule(req, res) {
     try {
-      const results = await T_XXHR_OSK_POSITIONS.findAll({
-        attributes: [
-          'ORG_ID',
-          [
-            literal(
-              `(select ORG_NAME from T_XXHR_OSK_ORG_HIERARHY_V where ORGANIZATION_ID = T_XXHR_OSK_POSITIONS.ORG_ID and DATE_TO > GETDATE() and TYPE != '02')`,
-            ),
-            'ORG_NAME',
-          ],
-        ],
-        include: [
-          {
-            model: T_XXHR_OSK_ASSIGNMENTS_V,
-            as: 'assignment',
-            attributes: [
-              'PARENT_ORG_ID',
-              'PARENT_ORG_NAME',
-              'POSITION_ID',
-              'POSITION_NAME',
-            ],
-            include: [
-              {
-                model: T_XXHR_OSK_ORG_HIERARHY_V,
-                as: 'orgHierarchy',
-                attributes: ['ORG_NAME'],
-                where: {
-                  DATE_TO: {
-                    [Op.gt]: new Date(),
-                  },
-                  TYPE: {
-                    [Op.notIn]: ['03', '02'],
-                  },
-                },
-              },
-            ],
-          },
-        ],
-        where: {
-          [Op.or]: [
-            { POSITION_ID: { [Op.like]: `%${req.query.position}%` } as any },
-            { POSITION_NAME: { [Op.like]: `%${req.query.position}%` } as any },
-          ],
-        },
-        raw: true, // To return raw query results without model instances
-      });
-
       return res.status(errors.success.code).json(results);
     } catch (e) {
       console.warn(e.message);
