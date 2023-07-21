@@ -7,6 +7,7 @@ import {
   BelongsTo,
 } from 'sequelize-typescript';
 import { T_XXHR_SCHEDULE_BRIGADES_V } from './T_XXHR_SCHEDULE_BRIGADES_V.model';
+import { T_XXHR_OSK_ORG_HIERARHY_V } from './T_XXHR_OSK_ORG_HIERARHY_V.model';
 
 @Table({
   tableName: 'T_XXHR_OSK_ASSIGNMENTS_V',
@@ -95,10 +96,10 @@ export class T_XXHR_OSK_ASSIGNMENTS_V extends Model<T_XXHR_OSK_ASSIGNMENTS_V> {
   @Column({ type: DataType.STRING(80), allowNull: false })
   PAYROLL_NAME: string;
 
-  @ForeignKey(() => T_XXHR_SCHEDULE_BRIGADES_V)
+  @ForeignKey(() => T_XXHR_OSK_ORG_HIERARHY_V)
   @Column
-  SCHEDULE_BRIGADE_ID: number;
+  ORGANIZATION_ID: number;
 
-  @BelongsTo(() => T_XXHR_SCHEDULE_BRIGADES_V, 'SCHEDULE_BRIGADE_ID')
-  assignments: T_XXHR_SCHEDULE_BRIGADES_V;
+  @BelongsTo(() => T_XXHR_OSK_ORG_HIERARHY_V)
+  organizations: T_XXHR_OSK_ORG_HIERARHY_V;
 }

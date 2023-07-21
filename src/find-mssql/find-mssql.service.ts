@@ -21,7 +21,7 @@ export class FindMssqlService {
         include: [
           {
             model: T_XXHR_OSK_ORG_HIERARHY_V,
-            as: 'organization',
+            as: 'organizations',
             attributes: ['ORG_NAME'],
             where: {
               DATE_TO: {
@@ -39,7 +39,7 @@ export class FindMssqlService {
             include: [
               {
                 model: T_XXHR_OSK_ORG_HIERARHY_V,
-                as: 'organization',
+                as: 'organizations',
                 attributes: ['ORG_NAME'],
                 where: {
                   DATE_TO: {

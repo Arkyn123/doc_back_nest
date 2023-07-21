@@ -29,12 +29,12 @@ export class T_XXHR_SCHEDULE_BRIGADES_V extends Model<T_XXHR_SCHEDULE_BRIGADES_V
   ORGANIZATION_ID: number;
 
   @BelongsTo(() => T_XXHR_OSK_ORG_HIERARHY_V)
-  organization: T_XXHR_OSK_ORG_HIERARHY_V;
+  organizations: T_XXHR_OSK_ORG_HIERARHY_V;
 
   @ForeignKey(() => T_XXHR_OSK_ASSIGNMENTS_V)
   @Column
   ASSIGNMENT_ID: number;
 
-  @BelongsTo(() => T_XXHR_OSK_ASSIGNMENTS_V, 'ASSIGNMENT_ID')
+  @BelongsTo(() => T_XXHR_OSK_ASSIGNMENTS_V)
   assignments: T_XXHR_OSK_ASSIGNMENTS_V;
 }

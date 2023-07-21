@@ -56,5 +56,5 @@ export class T_XXHR_OSK_ORG_HIERARHY_V extends Model<T_XXHR_OSK_ORG_HIERARHY_V> 
   ORGANIZATION_ID: number;
 
   @HasMany(() => T_XXHR_SCHEDULE_BRIGADES_V)
-  organization: T_XXHR_SCHEDULE_BRIGADES_V[];
+  organizations: T_XXHR_SCHEDULE_BRIGADES_V[];
 }
