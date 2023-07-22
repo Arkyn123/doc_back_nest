@@ -7,11 +7,17 @@ import { T_XXHR_OSK_ORG_HIERARHY_V } from '../find-mssql/T_XXHR_OSK_ORG_HIERARHY
 import { T_XXHR_OSK_ASSIGNMENTS_V } from '../find-mssql/T_XXHR_OSK_ASSIGNMENTS_V.model';
 import { config } from 'src/utils/config';
 import { T_XXHR_OSK_POSITIONS } from 'src/find-mssql/T_XXHR_OSK_POSITIONS.model';
+import { T_XXHR_WORK_SCHEDULES } from 'src/find-mssql/T_XXHR_WORK_SCHEDULES.model';
 
 @Module({
   imports: [
     SequelizeModule.forRoot({
       dialect: config[process.env.NODE_ENV].databaseMSSQL.dialect,
+      dialectOptions: {
+        options: {
+          encrypt: false,
+        },
+      },
       host: config[process.env.NODE_ENV].databaseMSSQL.host,
       port: +config[process.env.NODE_ENV].databaseMSSQL.port,
       username: config[process.env.NODE_ENV].databaseMSSQL.username,
@@ -26,6 +32,7 @@ import { T_XXHR_OSK_POSITIONS } from 'src/find-mssql/T_XXHR_OSK_POSITIONS.model'
         T_XXHR_OSK_ORG_HIERARHY_V,
         T_XXHR_OSK_ASSIGNMENTS_V,
         T_XXHR_OSK_POSITIONS,
+        T_XXHR_WORK_SCHEDULES,
       ],
     }),
   ],

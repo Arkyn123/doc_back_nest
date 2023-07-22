@@ -7,6 +7,7 @@ import { T_XXHR_OSK_ASSIGNMENTS_V } from './T_XXHR_OSK_ASSIGNMENTS_V.model';
 import { T_XXHR_OSK_POSITIONS } from './T_XXHR_OSK_POSITIONS.model';
 import { databaseMSSQL } from '../databases/databaseMSSQL';
 import { Op, or, fn, col, where, literal } from 'sequelize';
+import { T_XXHR_WORK_SCHEDULES } from './T_XXHR_WORK_SCHEDULES.model';
 
 @Injectable()
 export class FindMssqlService {
@@ -17,7 +18,50 @@ export class FindMssqlService {
 
   async getAllSchedule(req, res) {
     try {
-      return res.status(errors.success.code).json(results);
+      const [results, metadata] = await databaseMSSQL.query(`
+      select distinct
+      a.ORG_ID,
+      (select ORG_NAME from T_XXHR_OSK_ORG_HIERARHY_V where ORGANIZATION_ID = a.ORG_ID and DATE_TO > GETDATE() and TYPE != 02) as ORG_NAME,
+      c.PARENT_ORG_ID, 
+      c.PARENT_ORG_NAME, 
+      a.POSITION_ID, 
+      a.POSITION_NAME, 
+      b.TYPE_NAME,
+      (select distinct ORG_NAME from T_XXHR_OSK_ORG_HIERARHY_V where ORGANIZATION_ID = b.ORGANIZATION_ID_PARENT and DATE_TO > GETDATE() and b.TYPE != 02 and b.TYPE != 03) as SECTOR
+      from [T_XXHR_OSK_POSITIONS] a
+      join [T_XXHR_OSK_ORG_HIERARHY_V] b on a.ORG_ID=b.ORGANIZATION_ID
+      join [T_XXHR_OSK_ASSIGNMENTS_V] c on a.ORG_ID=c.ORG_ID
+      where (b.DATE_TO > GETDATE()) and (a.POSITION_ID like '%${req.query.position}%' or a.POSITION_NAME like '%${req.query.position}%') 
+`);
+
+      const resq = await T_XXHR_OSK_POSITIONS.findAll({
+        attributes: ['ORG_ID'],
+        include: [
+          {
+            model: T_XXHR_OSK_ORG_HIERARHY_V,
+            attributes: ['ORGANIZATION_ID'],
+          },
+        ],
+        //@ts-ignore
+        where: {
+          [Op.or]: [
+            {
+              POSITION_ID: {
+                [Op.like]: `%${req.query.position}%`,
+              },
+            },
+            {
+              POSITION_NAME: {
+                [Op.like]: `%${req.query.position}%`,
+              },
+            },
+          ],
+        },
+      });
+
+      console.log(resq.length, results.length);
+
+      return res.status(errors.success.code).json(resq);
     } catch (e) {
       console.warn(e.message);
 
@@ -29,9 +73,15 @@ export class FindMssqlService {
 
   async getAllBrigada(req, res) {
     try {
-      const [results, metadata] = await databaseMSSQL.query(
-        `SELECT distinct WORK_SCHEDULE_ID, CODE as SCHEDULE, NAME from T_XXHR_WORK_SCHEDULES WHERE CODE LIKE '%${req.query.brigada}%'`,
-      );
+      const results = await T_XXHR_WORK_SCHEDULES.findAll({
+        where: {
+          CODE: {
+            [Op.like]: `%${req.query.brigada}%`,
+          },
+        },
+        attributes: ['WORK_SCHEDULE_ID', [col('CODE'), 'SCHEDULE'], 'NAME'],
+        raw: true,
+      });
 
       return res.status(errors.success.code).json(results);
     } catch (e) {
@@ -44,11 +94,12 @@ export class FindMssqlService {
     console.log(req.query.brigades);
 
     try {
-      const brigades = await this.t_XXHR_SCHEDULE_BRIGADES_V.findAll({
+      const brigades = await T_XXHR_SCHEDULE_BRIGADES.findAll({
         where: {
           WORK_SCHEDULE_ID: req.query.brigades,
         },
-        attributes: ['WORK_SCHEDULE_ID', 'BRIGADE', 'NOTE'],
+        attributes: ['WORK_SCHEDULE_ID', 'BRIGADE'],
+        raw: true,
       });
 
       return res.status(errors.success.code).json(brigades);

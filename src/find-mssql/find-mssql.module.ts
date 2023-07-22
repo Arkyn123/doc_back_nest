@@ -6,6 +6,7 @@ import { T_XXHR_SCHEDULE_BRIGADES } from './T_XXHR_SCHEDULE_BRIGADES.model';
 import { T_XXHR_OSK_ORG_HIERARHY_V } from './T_XXHR_OSK_ORG_HIERARHY_V.model';
 import { T_XXHR_OSK_POSITIONS } from './T_XXHR_OSK_POSITIONS.model';
 import { T_XXHR_OSK_ASSIGNMENTS_V } from './T_XXHR_OSK_ASSIGNMENTS_V.model';
+import { T_XXHR_WORK_SCHEDULES } from './T_XXHR_WORK_SCHEDULES.model';
 
 @Module({
   controllers: [FindMssqlController],
@@ -16,6 +17,7 @@ import { T_XXHR_OSK_ASSIGNMENTS_V } from './T_XXHR_OSK_ASSIGNMENTS_V.model';
       T_XXHR_OSK_ORG_HIERARHY_V,
       T_XXHR_OSK_ASSIGNMENTS_V,
       T_XXHR_OSK_POSITIONS,
+      T_XXHR_WORK_SCHEDULES,
     ]),
   ],
 })

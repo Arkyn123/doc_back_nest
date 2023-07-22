@@ -104,9 +104,10 @@ export class T_XXHR_OSK_ASSIGNMENTS_V extends Model<T_XXHR_OSK_ASSIGNMENTS_V> {
   @Column({ type: DataType.NUMBER, allowNull: false })
   POSITION_ID: number;
 
-  @BelongsTo(() => T_XXHR_OSK_POSITIONS, 'POSITION_ID')
+  @BelongsTo(() => T_XXHR_OSK_POSITIONS, 'ORG_ID')
   assignments: T_XXHR_OSK_POSITIONS;
-
+  
+  @ForeignKey(() => T_XXHR_OSK_POSITIONS)
   @ForeignKey(() => T_XXHR_OSK_ORG_HIERARHY_V)
   @Column({ type: DataType.NUMBER, allowNull: true })
   ORG_ID: number;

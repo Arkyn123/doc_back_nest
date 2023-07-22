@@ -5,14 +5,30 @@ let databaseMSSQL;
 if (config[process.env.NODE_ENV].databaseMSSQL.use_env_variable) {
   databaseMSSQL = new Sequelize(
     process.env[config[process.env.NODE_ENV].databaseMSSQL.use_env_variable],
-    config[process.env.NODE_ENV].databaseMSSQL,
+    {
+      dialect: 'mssql',
+      dialectOptions: {
+        options: {
+          encrypt: false,
+        },
+      },
+    },
   );
 } else {
   databaseMSSQL = new Sequelize(
     config[process.env.NODE_ENV].databaseMSSQL.database,
     config[process.env.NODE_ENV].databaseMSSQL.username,
     config[process.env.NODE_ENV].databaseMSSQL.password,
-    config[process.env.NODE_ENV].databaseMSSQL,
+    {
+      host: config[process.env.NODE_ENV].databaseMSSQL.host,
+      port: config[process.env.NODE_ENV].databaseMSSQL.port,
+      dialect: 'mssql',
+      dialectOptions: {
+        options: {
+          encrypt: false,
+        },
+      },
+    },
   );
 }
 

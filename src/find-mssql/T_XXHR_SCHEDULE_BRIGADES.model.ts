@@ -6,8 +6,6 @@ import {
   BelongsTo,
   ForeignKey,
 } from 'sequelize-typescript';
-import { T_XXHR_OSK_ORG_HIERARHY_V } from './T_XXHR_OSK_ORG_HIERARHY_V.model';
-import { T_XXHR_OSK_ASSIGNMENTS_V } from './T_XXHR_OSK_ASSIGNMENTS_V.model';
 
 @Table({
   tableName: 'T_XXHR_SCHEDULE_BRIGADES',
