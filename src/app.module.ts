@@ -5,23 +5,15 @@ import {
 } from './utils/paths';
 
 import { UserModule } from './user/user.module';
-
 import { DocumentModule } from './document/document.module';
-
 import { ReportModule } from './report/report.module';
-
-import { FindMssqlModule } from './find-mssql/find-mssql.module';
-
 import { DocumentFileModule } from './documentFile/documentFile.module';
-
 import { DocumentTypeModule } from './documentType/documentType.module';
-
 import { DocumentStatusModule } from './documentStatus/documentStatus.module';
-
 import { DocumentRouteModule } from './documentRoute/documentRoute.module';
 
+import { FindMssqlModule } from './find-mssql/find-mssql.module';
 import { DicOfficeModule } from './dicOffice/dicOffice.module';
-
 import { DicOfficeCorrespondenceModule } from './dicOfficeCorrespondence/dicOfficeCorrespondence.module';
 
 import { setPermissions } from './middleware/SetPermissions';

@@ -24,12 +24,12 @@ import { T_XXHR_OSK_POSITIONS } from './T_XXHR_OSK_POSITIONS.model';
   ],
 })
 export class T_XXHR_OSK_ASSIGNMENTS_V extends Model<T_XXHR_OSK_ASSIGNMENTS_V> {
-  @Column({ type: DataType.NUMBER, allowNull: false })
-  PERSON_ID: number;
-
   @PrimaryKey
   @Column({ type: DataType.NUMBER, allowNull: false })
   ASSIGNMENT_ID: number;
+
+  @Column({ type: DataType.NUMBER, allowNull: false })
+  PERSON_ID: number;
 
   @Column({ type: DataType.STRING(30), allowNull: false })
   EMPLOYEE_NUMBER: string;
@@ -73,8 +73,8 @@ export class T_XXHR_OSK_ASSIGNMENTS_V extends Model<T_XXHR_OSK_ASSIGNMENTS_V> {
   @Column({ type: DataType.STRING(150), allowNull: false })
   COD: string;
 
-  // @Column({ type: DataType.NUMBER, allowNull: false })
-  // ORG_ID: number;
+  @Column({ type: DataType.NUMBER, allowNull: false })
+  ORG_ID: number;
 
   @Column({ type: DataType.STRING(240), allowNull: false })
   ORG_NAME!: string;
@@ -104,14 +104,6 @@ export class T_XXHR_OSK_ASSIGNMENTS_V extends Model<T_XXHR_OSK_ASSIGNMENTS_V> {
   @Column({ type: DataType.NUMBER, allowNull: false })
   POSITION_ID: number;
 
-  @BelongsTo(() => T_XXHR_OSK_POSITIONS, 'ORG_ID')
-  assignments: T_XXHR_OSK_POSITIONS;
-  
-  @ForeignKey(() => T_XXHR_OSK_POSITIONS)
-  @ForeignKey(() => T_XXHR_OSK_ORG_HIERARHY_V)
-  @Column({ type: DataType.NUMBER, allowNull: true })
-  ORG_ID: number;
-
-  @BelongsTo(() => T_XXHR_OSK_ORG_HIERARHY_V, 'ORG_ID')
-  orgHierarchy: T_XXHR_OSK_ORG_HIERARHY_V;
+  @BelongsTo(() => T_XXHR_OSK_POSITIONS, 'POSITION_ID')
+  T_XXHR_OSK_POSITIONS: T_XXHR_OSK_POSITIONS;
 }

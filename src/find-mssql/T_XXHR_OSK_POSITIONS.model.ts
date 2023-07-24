@@ -28,15 +28,16 @@ export class T_XXHR_OSK_POSITIONS extends Model<T_XXHR_OSK_POSITIONS> {
   })
   POSITION_NAME: string;
 
+  @ForeignKey(() => T_XXHR_OSK_ORG_HIERARHY_V)
   @Column({
-    type: DataType.STRING(240),
+    type: DataType.FLOAT,
     allowNull: true,
   })
-  ORG_ID: string;
+  ORG_ID: number;
 
   @BelongsTo(() => T_XXHR_OSK_ORG_HIERARHY_V, 'ORG_ID')
-  orgHierarchy: T_XXHR_OSK_ORG_HIERARHY_V;
+  T_XXHR_OSK_ORG_HIERARHY_V: T_XXHR_OSK_ORG_HIERARHY_V;
 
-  @BelongsTo(() => T_XXHR_OSK_ASSIGNMENTS_V, 'ORG_ID')
-  assignments: T_XXHR_OSK_ASSIGNMENTS_V;
+  @BelongsTo(() => T_XXHR_OSK_ASSIGNMENTS_V, 'POSITION_ID')
+  T_XXHR_OSK_ASSIGNMENTS_V: T_XXHR_OSK_ASSIGNMENTS_V;
 }

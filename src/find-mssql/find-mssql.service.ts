@@ -6,7 +6,7 @@ import { T_XXHR_OSK_ORG_HIERARHY_V } from './T_XXHR_OSK_ORG_HIERARHY_V.model';
 import { T_XXHR_OSK_ASSIGNMENTS_V } from './T_XXHR_OSK_ASSIGNMENTS_V.model';
 import { T_XXHR_OSK_POSITIONS } from './T_XXHR_OSK_POSITIONS.model';
 import { databaseMSSQL } from '../databases/databaseMSSQL';
-import { Op, or, fn, col, where, literal } from 'sequelize';
+import { Op } from 'sequelize';
 import { T_XXHR_WORK_SCHEDULES } from './T_XXHR_WORK_SCHEDULES.model';
 
 @Injectable()
@@ -34,15 +34,42 @@ export class FindMssqlService {
       where (b.DATE_TO > GETDATE()) and (a.POSITION_ID like '%${req.query.position}%' or a.POSITION_NAME like '%${req.query.position}%') 
 `);
 
-      const resq = await T_XXHR_OSK_POSITIONS.findAll({
-        attributes: ['ORG_ID'],
+      const { Op } = require('sequelize');
+
+      let positions = await T_XXHR_OSK_POSITIONS.findAll({
+        attributes: ['ORG_ID', 'POSITION_ID', 'POSITION_NAME'],
         include: [
           {
             model: T_XXHR_OSK_ORG_HIERARHY_V,
-            attributes: ['ORGANIZATION_ID'],
+            attributes: ['ORG_NAME', 'ORGANIZATION_ID_PARENT'],
+            on: {
+              ORGANIZATION_ID: { [Op.col]: 'T_XXHR_OSK_POSITIONS.ORG_ID' },
+            },
+            where: {
+              DATE_TO: {
+                [Op.gt]: new Date(),
+              },
+              TYPE: {
+                [Op.notIn]: ['02'],
+              },
+            },
+          },
+          {
+            model: T_XXHR_OSK_ORG_HIERARHY_V,
+            attributes: [['ORG_NAME', 'SECTOR']],
+            on: {
+              ORGANIZATION_ID: { [Op.col]: 'ORGANIZATION_ID_PARENT' },
+            },
+            where: {
+              DATE_TO: {
+                [Op.gt]: new Date(),
+              },
+              TYPE: {
+                [Op.notIn]: ['02', '03'],
+              },
+            },
           },
         ],
-        //@ts-ignore
         where: {
           [Op.or]: [
             {
@@ -59,11 +86,9 @@ export class FindMssqlService {
         },
       });
 
-      console.log(resq.length, results.length);
-
-      return res.status(errors.success.code).json(resq);
+      return res.status(errors.success.code).json(positions);
     } catch (e) {
-      console.warn(e.message);
+      console.warn(e);
 
       // console.warn(e?.original['errors'], e?.original['errors'].length);
 
@@ -79,7 +104,7 @@ export class FindMssqlService {
             [Op.like]: `%${req.query.brigada}%`,
           },
         },
-        attributes: ['WORK_SCHEDULE_ID', [col('CODE'), 'SCHEDULE'], 'NAME'],
+        attributes: ['WORK_SCHEDULE_ID', ['CODE', 'SCHEDULE'], 'NAME'],
         raw: true,
       });
 
