@@ -28,6 +28,7 @@ export class T_XXHR_OSK_POSITIONS extends Model<T_XXHR_OSK_POSITIONS> {
   })
   POSITION_NAME: string;
 
+  @ForeignKey(() => T_XXHR_OSK_ASSIGNMENTS_V)
   @ForeignKey(() => T_XXHR_OSK_ORG_HIERARHY_V)
   @Column({
     type: DataType.FLOAT,
@@ -38,6 +39,6 @@ export class T_XXHR_OSK_POSITIONS extends Model<T_XXHR_OSK_POSITIONS> {
   @BelongsTo(() => T_XXHR_OSK_ORG_HIERARHY_V, 'ORG_ID')
   T_XXHR_OSK_ORG_HIERARHY_V: T_XXHR_OSK_ORG_HIERARHY_V;
 
-  @BelongsTo(() => T_XXHR_OSK_ASSIGNMENTS_V, 'POSITION_ID')
+  @BelongsTo(() => T_XXHR_OSK_ASSIGNMENTS_V, 'ORG_ID')
   T_XXHR_OSK_ASSIGNMENTS_V: T_XXHR_OSK_ASSIGNMENTS_V;
 }

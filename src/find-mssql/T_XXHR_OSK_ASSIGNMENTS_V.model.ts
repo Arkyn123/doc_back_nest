@@ -73,9 +73,6 @@ export class T_XXHR_OSK_ASSIGNMENTS_V extends Model<T_XXHR_OSK_ASSIGNMENTS_V> {
   @Column({ type: DataType.STRING(150), allowNull: false })
   COD: string;
 
-  @Column({ type: DataType.NUMBER, allowNull: false })
-  ORG_ID: number;
-
   @Column({ type: DataType.STRING(240), allowNull: false })
   ORG_NAME!: string;
 
@@ -100,10 +97,13 @@ export class T_XXHR_OSK_ASSIGNMENTS_V extends Model<T_XXHR_OSK_ASSIGNMENTS_V> {
   @Column({ type: DataType.STRING(80), allowNull: false })
   PAYROLL_NAME: string;
 
-  @ForeignKey(() => T_XXHR_OSK_POSITIONS)
   @Column({ type: DataType.NUMBER, allowNull: false })
   POSITION_ID: number;
 
-  @BelongsTo(() => T_XXHR_OSK_POSITIONS, 'POSITION_ID')
+  @ForeignKey(() => T_XXHR_OSK_POSITIONS)
+  @Column({ type: DataType.NUMBER, allowNull: false })
+  ORG_ID: number;
+
+  @BelongsTo(() => T_XXHR_OSK_POSITIONS, 'ORG_ID')
   T_XXHR_OSK_POSITIONS: T_XXHR_OSK_POSITIONS;
 }

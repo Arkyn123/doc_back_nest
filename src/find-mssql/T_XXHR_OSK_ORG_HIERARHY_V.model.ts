@@ -32,9 +32,6 @@ export class T_XXHR_OSK_ORG_HIERARHY_V extends Model<T_XXHR_OSK_ORG_HIERARHY_V> 
   })
   ORG_NAME: string;
 
-  @Column({ type: DataType.NUMBER, allowNull: false })
-  ORGANIZATION_ID: number;
-
   @Column({ type: DataType.NUMBER, allowNull: true })
   SEQUENTIAL_NUMBER: number;
 
@@ -53,10 +50,17 @@ export class T_XXHR_OSK_ORG_HIERARHY_V extends Model<T_XXHR_OSK_ORG_HIERARHY_V> 
   @Column({ type: DataType.DATE, allowNull: false })
   update_date: Date;
 
-  @ForeignKey(() => T_XXHR_OSK_ASSIGNMENTS_V)
+  @ForeignKey(() => T_XXHR_OSK_ORG_HIERARHY_V)
   @Column({ type: DataType.NUMBER, allowNull: false })
   ORGANIZATION_ID_PARENT: number;
 
-  @BelongsTo(() => T_XXHR_OSK_ASSIGNMENTS_V, 'ORGANIZATION_ID_PARENT')
-  T_XXHR_OSK_ASSIGNMENTS_V: T_XXHR_OSK_ASSIGNMENTS_V;
+  @BelongsTo(() => T_XXHR_OSK_ORG_HIERARHY_V, 'ORGANIZATION_ID_PARENT')
+  T_XXHR_OSK_ORG_HIERARHY_V: T_XXHR_OSK_ORG_HIERARHY_V;
+
+  @ForeignKey(() => T_XXHR_OSK_POSITIONS)
+  @Column({ type: DataType.NUMBER, allowNull: false })
+  ORGANIZATION_ID: number;
+
+  @BelongsTo(() => T_XXHR_OSK_POSITIONS, 'ORG_ID')
+  T_XXHR_OSK_POSITIONS: T_XXHR_OSK_POSITIONS;
 }
