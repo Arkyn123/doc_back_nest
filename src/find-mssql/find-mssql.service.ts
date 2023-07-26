@@ -6,7 +6,7 @@ import { T_XXHR_OSK_ORG_HIERARHY_V } from './T_XXHR_OSK_ORG_HIERARHY_V.model';
 import { T_XXHR_OSK_ASSIGNMENTS_V } from './T_XXHR_OSK_ASSIGNMENTS_V.model';
 import { T_XXHR_OSK_POSITIONS } from './T_XXHR_OSK_POSITIONS.model';
 import { databaseMSSQL } from '../databases/databaseMSSQL';
-import { Op } from 'sequelize';
+import { Op, literal } from 'sequelize';
 import { T_XXHR_WORK_SCHEDULES } from './T_XXHR_WORK_SCHEDULES.model';
 
 @Injectable()
@@ -37,7 +37,39 @@ export class FindMssqlService {
       const { Op } = require('sequelize');
 
       let positions = await T_XXHR_OSK_POSITIONS.findAll({
-        attributes: ['ORG_ID', 'POSITION_ID', 'POSITION_NAME'],
+        attributes: [
+          'ORG_ID',
+          'POSITION_ID',
+          'POSITION_NAME',
+          [
+            literal(
+              `(select ORG_NAME from T_XXHR_OSK_ORG_HIERARHY_V where ORGANIZATION_ID = T_XXHR_OSK_POSITIONS.ORG_ID and DATE_TO > GETDATE() and TYPE != 02)`,
+            ),
+            'ORG_NAME',
+          ],
+          [
+            literal(
+              `(select distinct ORG_NAME from T_XXHR_OSK_ORG_HIERARHY_V where ORGANIZATION_ID = T_XXHR_OSK_ORG_HIERARHY_V.ORGANIZATION_ID_PARENT and DATE_TO > GETDATE() and TYPE != 02 and TYPE != 03)`,
+            ),
+            'SECTOR',
+          ],
+        ],
+        include: [
+          {
+            model: T_XXHR_OSK_ASSIGNMENTS_V,
+            attributes: [],
+            on: {
+              ORG_ID: { [Op.col]: 'T_XXHR_OSK_POSITIONS.ORG_ID' },
+            },
+          },
+          {
+            model: T_XXHR_OSK_ORG_HIERARHY_V,
+            attributes: [],
+            on: {
+              ORGANIZATION_ID: { [Op.col]: 'T_XXHR_OSK_POSITIONS.ORG_ID' },
+            },
+          },
+        ],
         where: {
           [Op.or]: [
             {
@@ -52,22 +84,6 @@ export class FindMssqlService {
             },
           ],
         },
-        include: [
-          {
-            model: T_XXHR_OSK_ASSIGNMENTS_V,
-            attributes: ['PARENT_ORG_ID', 'PARENT_ORG_NAME'],
-            on: {
-              ORG_ID: { [Op.col]: 'T_XXHR_OSK_POSITIONS.ORG_ID' },
-            },
-          },
-          {
-            model: T_XXHR_OSK_ORG_HIERARHY_V,
-            attributes: ['TYPE_NAME'],
-            on: {
-              ORGANIZATION_ID: { [Op.col]: 'T_XXHR_OSK_POSITIONS.ORG_ID' },
-            },
-          },
-        ],
       });
 
       function removeDuplicatesFromArray(arr) {
