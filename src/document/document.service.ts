@@ -37,17 +37,15 @@ export class DocumentService {
         },
       };
 
-      if (req.query.officeId) {
+      if (req.query.officeId)
         filter.where.officeId = {
           [Op.eq]: req.query.officeId,
         };
-      }
 
-      if (req.query.fullname) {
+      if (req.query.fullname)
         filter.where.usernames = {
           [Op.iLike]: `%${req.query.fullname}%`,
         };
-      }
 
       if (req.query.authorFullname) {
         const fieldKey = /\d/.test(req.query.authorFullname)
@@ -165,11 +163,10 @@ export class DocumentService {
         include: { all: true, nested: true },
       });
 
-      if (!document) {
+      if (!document)
         return res
           .status(errors.notFound.code)
           .json({ message: 'Документ не найден' });
-      }
 
       const route = await this.documentRouteRepository.findOne({
         where: {
@@ -271,9 +268,7 @@ export class DocumentService {
         }),
       ]);
 
-      if (!route || !type) {
-        return res.sendStatus(errors.notFound.code);
-      }
+      if (!route || !type) return res.sendStatus(errors.notFound.code);
 
       const document = await this.documentRepository.create({
         body,
