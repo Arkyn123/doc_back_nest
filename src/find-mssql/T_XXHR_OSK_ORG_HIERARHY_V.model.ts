@@ -7,9 +7,7 @@ import {
   BelongsTo,
   ForeignKey,
 } from 'sequelize-typescript';
-import { T_XXHR_SCHEDULE_BRIGADES } from './T_XXHR_SCHEDULE_BRIGADES.model';
 import { T_XXHR_OSK_POSITIONS } from './T_XXHR_OSK_POSITIONS.model';
-import { T_XXHR_OSK_ASSIGNMENTS_V } from './T_XXHR_OSK_ASSIGNMENTS_V.model';
 
 @Table({
   tableName: 'T_XXHR_OSK_ORG_HIERARHY_V',
@@ -50,12 +48,8 @@ export class T_XXHR_OSK_ORG_HIERARHY_V extends Model<T_XXHR_OSK_ORG_HIERARHY_V> 
   @Column({ type: DataType.DATE, allowNull: false })
   update_date: Date;
 
-  @ForeignKey(() => T_XXHR_OSK_ORG_HIERARHY_V)
   @Column({ type: DataType.NUMBER, allowNull: false })
   ORGANIZATION_ID_PARENT: number;
-
-  @BelongsTo(() => T_XXHR_OSK_ORG_HIERARHY_V, 'ORGANIZATION_ID_PARENT')
-  T_XXHR_OSK_ORG_HIERARHY_V: T_XXHR_OSK_ORG_HIERARHY_V;
 
   @ForeignKey(() => T_XXHR_OSK_POSITIONS)
   @Column({ type: DataType.NUMBER, allowNull: false })

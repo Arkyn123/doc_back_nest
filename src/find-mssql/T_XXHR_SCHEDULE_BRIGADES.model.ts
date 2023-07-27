@@ -1,11 +1,4 @@
-import {
-  Column,
-  Model,
-  Table,
-  DataType,
-  BelongsTo,
-  ForeignKey,
-} from 'sequelize-typescript';
+import { Column, Model, Table, DataType } from 'sequelize-typescript';
 
 @Table({
   tableName: 'T_XXHR_SCHEDULE_BRIGADES',

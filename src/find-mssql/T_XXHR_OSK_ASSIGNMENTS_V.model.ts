@@ -8,8 +8,7 @@ import {
   HasOne,
   PrimaryKey,
 } from 'sequelize-typescript';
-import { T_XXHR_SCHEDULE_BRIGADES } from './T_XXHR_SCHEDULE_BRIGADES.model';
-import { T_XXHR_OSK_ORG_HIERARHY_V } from './T_XXHR_OSK_ORG_HIERARHY_V.model';
+
 import { T_XXHR_OSK_POSITIONS } from './T_XXHR_OSK_POSITIONS.model';
 
 @Table({
@@ -63,9 +62,6 @@ export class T_XXHR_OSK_ASSIGNMENTS_V extends Model<T_XXHR_OSK_ASSIGNMENTS_V> {
 
   @Column({ type: DataType.DATE, allowNull: false })
   END_DATE!: Date;
-
-  // @Column({ type: DataType.NUMBER, allowNull: false })
-  // POSITION_ID: number;
 
   @Column({ type: DataType.STRING(240), allowNull: false })
   POSITION_NAME: string;

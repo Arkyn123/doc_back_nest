@@ -36,20 +36,30 @@ export class FindMssqlService {
 
       const { Op } = require('sequelize');
 
+      // [
+      //   literal(
+      //     `(SELECT DISTINCT ORG_NAME FROM T_XXHR_OSK_ORG_HIERARHY_V WHERE ORGANIZATION_ID = T_XXHR_OSK_ORG_HIERARHY_V.ORGANIZATION_ID_PARENT AND DATE_TO > GETDATE() AND T_XXHR_OSK_ORG_HIERARHY_V.TYPE != '02' and T_XXHR_OSK_ORG_HIERARHY_V.TYPE != '03')`,
+      //   ),
+      //   'SECTOR',
+      // ],
+
       let positions = await T_XXHR_OSK_POSITIONS.findAll({
         attributes: [
           'ORG_ID',
-          'POSITION_ID',
-          'POSITION_NAME',
           [
             literal(
-              `(select ORG_NAME from T_XXHR_OSK_ORG_HIERARHY_V where ORGANIZATION_ID = T_XXHR_OSK_POSITIONS.ORG_ID and DATE_TO > GETDATE() and TYPE != 02)`,
+              `(SELECT DISTINCT ORG_NAME FROM T_XXHR_OSK_ORG_HIERARHY_V WHERE ORGANIZATION_ID = T_XXHR_OSK_POSITIONS.ORG_ID AND DATE_TO > GETDATE() AND TYPE != '02')`,
             ),
             'ORG_NAME',
           ],
+          'T_XXHR_OSK_ASSIGNMENTS_V.PARENT_ORG_ID',
+          'T_XXHR_OSK_ASSIGNMENTS_V.PARENT_ORG_NAME',
+          'POSITION_ID',
+          'POSITION_NAME',
+          'T_XXHR_OSK_ORG_HIERARHY_V.TYPE_NAME',
           [
             literal(
-              `(select distinct ORG_NAME from T_XXHR_OSK_ORG_HIERARHY_V where ORGANIZATION_ID = T_XXHR_OSK_ORG_HIERARHY_V.ORGANIZATION_ID_PARENT and DATE_TO > GETDATE() and TYPE != 02 and TYPE != 03)`,
+              `(SELECT DISTINCT ORG_NAME FROM T_XXHR_OSK_ORG_HIERARHY_V WHERE ORGANIZATION_ID = T_XXHR_OSK_ORG_HIERARHY_V.ORGANIZATION_ID_PARENT AND DATE_TO > GETDATE())`,
             ),
             'SECTOR',
           ],
@@ -83,7 +93,9 @@ export class FindMssqlService {
               },
             },
           ],
+          [Op.and]: literal('(T_XXHR_OSK_ORG_HIERARHY_V.DATE_TO > GETDATE())'),
         },
+        raw: true,
       });
 
       function removeDuplicatesFromArray(arr) {
