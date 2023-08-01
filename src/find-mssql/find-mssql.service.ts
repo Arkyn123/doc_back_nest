@@ -6,7 +6,7 @@ import { T_XXHR_OSK_ORG_HIERARHY_V } from './T_XXHR_OSK_ORG_HIERARHY_V.model';
 import { T_XXHR_OSK_ASSIGNMENTS_V } from './T_XXHR_OSK_ASSIGNMENTS_V.model';
 import { T_XXHR_OSK_POSITIONS } from './T_XXHR_OSK_POSITIONS.model';
 import { databaseMSSQL } from '../databases/databaseMSSQL';
-import { Op, literal } from 'sequelize';
+import { Op, literal, col } from 'sequelize';
 import { T_XXHR_WORK_SCHEDULES } from './T_XXHR_WORK_SCHEDULES.model';
 
 @Injectable()
@@ -36,31 +36,17 @@ export class FindMssqlService {
 
       const { Op } = require('sequelize');
 
-      // [
-      //   literal(
-      //     `(SELECT DISTINCT ORG_NAME FROM T_XXHR_OSK_ORG_HIERARHY_V WHERE ORGANIZATION_ID = T_XXHR_OSK_ORG_HIERARHY_V.ORGANIZATION_ID_PARENT AND DATE_TO > GETDATE() AND T_XXHR_OSK_ORG_HIERARHY_V.TYPE != '02' and T_XXHR_OSK_ORG_HIERARHY_V.TYPE != '03')`,
-      //   ),
-      //   'SECTOR',
-      // ],
-
       let positions = await T_XXHR_OSK_POSITIONS.findAll({
         attributes: [
           'ORG_ID',
-          [
-            literal(
-              `(SELECT DISTINCT ORG_NAME FROM T_XXHR_OSK_ORG_HIERARHY_V WHERE ORGANIZATION_ID = T_XXHR_OSK_POSITIONS.ORG_ID AND DATE_TO > GETDATE() AND TYPE != '02')`,
-            ),
-            'ORG_NAME',
-          ],
+          'T_XXHR_OSK_ORG_HIERARHY_V.ORG_NAME',
           'T_XXHR_OSK_ASSIGNMENTS_V.PARENT_ORG_ID',
           'T_XXHR_OSK_ASSIGNMENTS_V.PARENT_ORG_NAME',
           'POSITION_ID',
           'POSITION_NAME',
           'T_XXHR_OSK_ORG_HIERARHY_V.TYPE_NAME',
           [
-            literal(
-              `(SELECT DISTINCT ORG_NAME FROM T_XXHR_OSK_ORG_HIERARHY_V WHERE ORGANIZATION_ID = T_XXHR_OSK_ORG_HIERARHY_V.ORGANIZATION_ID_PARENT AND DATE_TO > GETDATE())`,
-            ),
+            col('T_XXHR_OSK_ORG_HIERARHY_V.T_XXHR_OSK_ORG_HIERARHY_V.ORG_NAME'),
             'SECTOR',
           ],
         ],
@@ -77,7 +63,28 @@ export class FindMssqlService {
             attributes: [],
             on: {
               ORGANIZATION_ID: { [Op.col]: 'T_XXHR_OSK_POSITIONS.ORG_ID' },
+              DATE_TO: {
+                [Op.gt]: Date.now(),
+              },
+              TYPE: {
+                [Op.ne]: '02',
+              },
             },
+            include: [
+              {
+                model: T_XXHR_OSK_ORG_HIERARHY_V,
+                attributes: [],
+                on: {
+                  ORGANIZATION_ID: {
+                    [Op.col]:
+                      'T_XXHR_OSK_ORG_HIERARHY_V.ORGANIZATION_ID_PARENT',
+                  },
+                  TYPE: {
+                    [Op.ne]: '03',
+                  },
+                },
+              },
+            ],
           },
         ],
         where: {

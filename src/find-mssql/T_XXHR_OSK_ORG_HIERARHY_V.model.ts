@@ -39,6 +39,7 @@ export class T_XXHR_OSK_ORG_HIERARHY_V extends Model<T_XXHR_OSK_ORG_HIERARHY_V> 
   })
   TYPE_NAME: string;
 
+  @ForeignKey(() => T_XXHR_OSK_ORG_HIERARHY_V)
   @Column({
     type: DataType.STRING(30),
     allowNull: true,
@@ -48,13 +49,13 @@ export class T_XXHR_OSK_ORG_HIERARHY_V extends Model<T_XXHR_OSK_ORG_HIERARHY_V> 
   @Column({ type: DataType.DATE, allowNull: false })
   update_date: Date;
 
+  @ForeignKey(() => T_XXHR_OSK_ORG_HIERARHY_V)
   @Column({ type: DataType.NUMBER, allowNull: false })
   ORGANIZATION_ID_PARENT: number;
 
-  @ForeignKey(() => T_XXHR_OSK_POSITIONS)
   @Column({ type: DataType.NUMBER, allowNull: false })
   ORGANIZATION_ID: number;
 
-  @BelongsTo(() => T_XXHR_OSK_POSITIONS, 'ORG_ID')
-  T_XXHR_OSK_POSITIONS: T_XXHR_OSK_POSITIONS;
+  @BelongsTo(() => T_XXHR_OSK_ORG_HIERARHY_V)
+  T_XXHR_OSK_ORG_HIERARHY_V: T_XXHR_OSK_ORG_HIERARHY_V;
 }

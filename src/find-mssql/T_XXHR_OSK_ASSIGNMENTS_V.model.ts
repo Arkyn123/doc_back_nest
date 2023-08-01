@@ -7,6 +7,7 @@ import {
   BelongsTo,
   HasOne,
   PrimaryKey,
+  HasMany,
 } from 'sequelize-typescript';
 
 import { T_XXHR_OSK_POSITIONS } from './T_XXHR_OSK_POSITIONS.model';
@@ -96,10 +97,6 @@ export class T_XXHR_OSK_ASSIGNMENTS_V extends Model<T_XXHR_OSK_ASSIGNMENTS_V> {
   @Column({ type: DataType.NUMBER, allowNull: false })
   POSITION_ID: number;
 
-  @ForeignKey(() => T_XXHR_OSK_POSITIONS)
   @Column({ type: DataType.NUMBER, allowNull: false })
   ORG_ID: number;
-
-  @BelongsTo(() => T_XXHR_OSK_POSITIONS, 'ORG_ID')
-  T_XXHR_OSK_POSITIONS: T_XXHR_OSK_POSITIONS;
 }
