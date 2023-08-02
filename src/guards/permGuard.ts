@@ -20,7 +20,7 @@ export class PermGuard implements CanActivate {
     const userRoles = req['user'].roles;
 
     if (!documentId) {
-      console.warn('не найден документ в permGuard');
+      console.warn('Не найден документ в PermGuard');
       return false;
     }
 

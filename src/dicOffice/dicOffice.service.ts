@@ -10,10 +10,8 @@ export class DicOfficeService {
     private readonly dicOfficeRepository: typeof DicOffice,
   ) {}
 
-  async getAll(req, res) {
+  async getAll(filter, res) {
     try {
-      const filter = { ...req.filter };
-
       if (!filter.where) {
         filter.where = {};
       } else {
@@ -32,10 +30,10 @@ export class DicOfficeService {
     }
   }
 
-  async addInDictionary(req, res) {
+  async addInDictionary(body, res) {
     try {
       const dic_office = await this.dicOfficeRepository.create({
-        ...req.body,
+        ...body,
         CreatedDate: Date.now(),
         FlagDeleted: false,
       });
@@ -47,14 +45,14 @@ export class DicOfficeService {
     }
   }
 
-  async saveInDictionary(req, res) {
+  async saveInDictionary(body, param, res) {
     try {
-      const dic_office = await this.dicOfficeRepository.findByPk(req.params.id);
+      const dic_office = await this.dicOfficeRepository.findByPk(param.id);
 
       if (!dic_office) return res.sendStatus(errors.notFound.code);
 
       await dic_office.update({
-        ...req.body,
+        ...body,
         UpdatedDate: Date.now(),
       });
 
@@ -65,9 +63,9 @@ export class DicOfficeService {
     }
   }
 
-  async delInDictionary(req, res) {
+  async delInDictionary(param, res) {
     try {
-      const dic_office = await this.dicOfficeRepository.findByPk(req.params.id);
+      const dic_office = await this.dicOfficeRepository.findByPk(param.id);
 
       if (!dic_office) return res.sendStatus(errors.notFound.code);
 

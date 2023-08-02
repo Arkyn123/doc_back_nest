@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Put, Req, Res } from '@nestjs/common';
-import { SequelizeFiltering } from '../middleware/SequelizeFilteringMiddleware';
+import { Body, Controller, Get, Param, Post, Put, Res } from '@nestjs/common';
 import { DicOfficeCorrespondenceService } from './dicOfficeCorrespondence.service';
+import { Filter } from 'src/utils/custom.decorators';
 
 @Controller('dicOfficeCorrespondence')
 export class DicOfficeCorrespondenceController {
@@ -9,22 +9,26 @@ export class DicOfficeCorrespondenceController {
   ) {}
 
   @Get()
-  getAll(@Req() req, @Res() res) {
-    return this.dicOfficeCorrespondenceService.getAll(req, res);
+  getAll(@Filter() filter, @Res() res) {
+    return this.dicOfficeCorrespondenceService.getAll(filter, res);
   }
 
   @Post('/add')
-  addInDictionary(@Req() req, @Res() res) {
-    return this.dicOfficeCorrespondenceService.addInDictionary(req, res);
+  addInDictionary(@Body() body, @Res() res) {
+    return this.dicOfficeCorrespondenceService.addInDictionary(body, res);
   }
 
   @Put('/update/:id')
-  saveInDictionary(@Req() req, @Res() res) {
-    return this.dicOfficeCorrespondenceService.saveInDictionary(req, res);
+  saveInDictionary(@Body() body, @Param() param, @Res() res) {
+    return this.dicOfficeCorrespondenceService.saveInDictionary(
+      body,
+      param,
+      res,
+    );
   }
 
   @Put('/delete/:id')
-  delInDictionary(@Req() req, @Res() res) {
-    return this.dicOfficeCorrespondenceService.delInDictionary(req, res);
+  delInDictionary(@Param() param, @Res() res) {
+    return this.dicOfficeCorrespondenceService.delInDictionary(param, res);
   }
 }

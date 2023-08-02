@@ -10,10 +10,8 @@ export class DicOfficeCorrespondenceService {
     private readonly dicOfficeCorrespondenceRepository: typeof DicOfficeCorrespondence,
   ) {}
 
-  async getAll(req, res) {
+  async getAll(filter, res) {
     try {
-      const filter = { ...req.filter };
-
       if (!filter.where) {
         filter.where = {};
       } else {
@@ -33,11 +31,11 @@ export class DicOfficeCorrespondenceService {
     }
   }
 
-  async addInDictionary(req, res) {
+  async addInDictionary(body, res) {
     try {
       const dic_office_correspondence =
         await this.dicOfficeCorrespondenceRepository.create({
-          ...req.body,
+          ...body,
           CreatedDate: Date.now(),
           FlagDeleted: false,
         });
@@ -49,16 +47,16 @@ export class DicOfficeCorrespondenceService {
     }
   }
 
-  async saveInDictionary(req, res) {
+  async saveInDictionary(body, param, res) {
     try {
       const dic_office_correspondence =
-        await this.dicOfficeCorrespondenceRepository.findByPk(req.params.id);
+        await this.dicOfficeCorrespondenceRepository.findByPk(param.id);
 
       if (!dic_office_correspondence)
         return res.sendStatus(errors.notFound.code);
 
       await dic_office_correspondence.update({
-        ...req.body,
+        ...body,
         UpdatedDate: Date.now(),
       });
 
@@ -69,10 +67,10 @@ export class DicOfficeCorrespondenceService {
     }
   }
 
-  async delInDictionary(req, res) {
+  async delInDictionary(param, res) {
     try {
       const dic_office_correspondence =
-        await this.dicOfficeCorrespondenceRepository.findByPk(req.params.id);
+        await this.dicOfficeCorrespondenceRepository.findByPk(param.id);
 
       if (!dic_office_correspondence)
         return res.sendStatus(errors.notFound.code);

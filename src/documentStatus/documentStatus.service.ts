@@ -11,7 +11,7 @@ export class DocumentStatusService {
     private readonly documentStatusRepository: typeof DocumentStatus,
   ) {}
 
-  async getAllStatuses(req, res) {
+  async getAllStatuses(res) {
     try {
       const statuses = await this.documentStatusRepository.findAll();
 
@@ -22,14 +22,12 @@ export class DocumentStatusService {
     }
   }
 
-  async addNewStatus(req, res) {
+  async addNewStatus(body, user, res) {
     try {
-      const { id: ownerId, fullname: ownerFullname } = req.user;
-
       const result = await this.documentStatusRepository.create({
-        ownerId,
-        ownerFullname,
-        ...req.body,
+        ownerId: user.id,
+        ownerFullname: user.fullname,
+        ...body,
       });
 
       return res.status(errors.success.code).json(result);

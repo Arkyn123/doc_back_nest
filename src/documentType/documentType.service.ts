@@ -10,7 +10,7 @@ export class DocumentTypeService {
     private readonly documentTypeRepository: typeof DocumentType,
   ) {}
 
-  async getAllDocumentType(req, res) {
+  async getAllDocumentType(res) {
     try {
       const documentTypes = await this.documentTypeRepository.findAll({
         include: [{ all: true, nested: true, duplicating: true }],
@@ -23,10 +23,10 @@ export class DocumentTypeService {
     }
   }
 
-  async addNewDocumentType(req, res) {
+  async addNewDocumentType(body, res) {
     try {
       const documentType = await this.documentTypeRepository.upsert({
-        ...req.body,
+        ...body,
       });
 
       return res.status(errors.success.code).json(documentType);

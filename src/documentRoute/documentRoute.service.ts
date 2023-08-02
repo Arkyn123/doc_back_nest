@@ -11,7 +11,7 @@ export class DocumentRouteService {
     private readonly documentRouteRepository: typeof DocumentRoute,
   ) {}
 
-  async getAllDocumentRoute(req, res) {
+  async getAllDocumentRoute(res) {
     try {
       const documentRoutes = await this.documentRouteRepository.findAll({
         include: [{ all: true, nested: true, duplicating: true }],
@@ -24,11 +24,11 @@ export class DocumentRouteService {
     }
   }
 
-  async getDocumentRouteByDocumentTypeId(req, res) {
+  async getDocumentRouteByDocumentTypeId(param, res) {
     try {
       const documentRoutes = await this.documentRouteRepository.findAll({
         where: {
-          documentType: req.params.documentTypeId,
+          documentType: param.documentTypeId,
         },
         include: [{ all: true, nested: true, duplicating: true }],
       });
@@ -40,14 +40,12 @@ export class DocumentRouteService {
     }
   }
 
-  async addNewDocumentRoute(req, res) {
+  async addNewDocumentRoute(body, user, res) {
     try {
-      const { id: ownerId, fullname: ownerFullname } = req.user;
-
       const documentRoutes = await this.documentRouteRepository.create({
-        ...req.body,
-        ownerId,
-        ownerFullname,
+        ...body,
+        ownerId: user.id,
+        ownerFullname: user.fullname,
       });
 
       return res.status(errors.success.code).json(documentRoutes);
@@ -60,10 +58,10 @@ export class DocumentRouteService {
     }
   }
 
-  async deleteDocumentRouteById(req, res) {
+  async deleteDocumentRouteById(param, res) {
     try {
       const documentRoutes = await this.documentRouteRepository.findByPk(
-        req.params.documentTypeId,
+        param.documentTypeId,
       );
 
       if (!documentRoutes) return res.sendStatus(errors.notFound.code);

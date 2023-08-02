@@ -64,7 +64,6 @@ export class DocumentController {
     @User() user,
     @Param() param,
     @Body() body,
-
     @Res() res,
   ) {
     return this.documentService.updateDocumentFromDraftAndRevisionByDocumentId(
@@ -77,13 +76,7 @@ export class DocumentController {
 
   @UseGuards(PermGuard)
   @Put('/updateInfoForRole/:documentId')
-  updateInfoForRole(
-    @User() user,
-    @Param() param,
-    @Body() body,
-
-    @Res() res,
-  ) {
+  updateInfoForRole(@User() user, @Param() param, @Body() body, @Res() res) {
     return this.documentService.updateDocumentInfoForRole(
       user,
       param,
@@ -94,18 +87,8 @@ export class DocumentController {
 
   @UseGuards(PermGuard)
   @Put('/updateDocumentFlagDeleted/:documentId')
-  updateDocumentFlagDeleted(
-    @Param() param,
-    @Body() body,
-    @Req() req,
-    @Res() res,
-  ) {
-    return this.documentService.updateDocumentFlagDeleted(
-      param,
-      body,
-      req,
-      res,
-    );
+  updateDocumentFlagDeleted(@Param() param, @Body() body, @Res() res) {
+    return this.documentService.updateDocumentFlagDeleted(param, body, res);
   }
 
   @Delete('/delete')

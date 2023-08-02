@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Res } from '@nestjs/common';
+import { Controller, Get, Query, Req, Res } from '@nestjs/common';
 import { FindMssqlService } from './find-mssql.service';
 
 @Controller('findMSSQL')
@@ -6,17 +6,17 @@ export class FindMssqlController {
   constructor(private readonly findMssqlService: FindMssqlService) {}
 
   @Get('schedule')
-  getAllSchedule(@Req() req, @Res() res) {
-    return this.findMssqlService.getAllSchedule(req, res);
+  getAllSchedule(@Query() query, @Res() res) {
+    return this.findMssqlService.getAllSchedule(query, res);
   }
 
   @Get('brigada')
-  getAllBrigada(@Req() req, @Res() res) {
-    return this.findMssqlService.getAllBrigada(req, res);
+  getAllBrigada(@Query() query, @Res() res) {
+    return this.findMssqlService.getAllBrigada(query, res);
   }
 
   @Get('brigades')
-  getAllBrigades(@Req() req, @Res() res) {
-    return this.findMssqlService.getAllBrigades(req, res);
+  getAllBrigades(@Query() query, @Res() res) {
+    return this.findMssqlService.getAllBrigades(query, res);
   }
 }

@@ -1,27 +1,39 @@
-import { Controller, Delete, Get, Post, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { DocumentRouteService } from './documentRoute.service';
+import { User } from 'src/utils/custom.decorators';
 
 @Controller('documentRoute')
 export class DocumentRouteController {
   constructor(private readonly documentRouteService: DocumentRouteService) {}
 
   @Get()
-  getAllDocumentRoute(@Req() req, @Res() res) {
-    return this.documentRouteService.getAllDocumentRoute(req, res);
+  getAllDocumentRoute(@Res() res) {
+    return this.documentRouteService.getAllDocumentRoute(res);
   }
 
   @Get(':documentTypeId')
-  getDocumentRouteByDocumentTypeId(@Req() req, @Res() res) {
-    return this.documentRouteService.getDocumentRouteByDocumentTypeId(req, res);
+  getDocumentRouteByDocumentTypeId(@Param() param, @Res() res) {
+    return this.documentRouteService.getDocumentRouteByDocumentTypeId(
+      param,
+      res,
+    );
   }
 
   @Post('add')
-  addNewDocumentRoute(@Req() req, @Res() res) {
-    return this.documentRouteService.addNewDocumentRoute(req, res);
+  addNewDocumentRoute(@Body() body, @User() user, @Res() res) {
+    return this.documentRouteService.addNewDocumentRoute(body, user, res);
   }
 
   @Delete('delete/:documentTypeId')
-  deleteDocumentRouteById(@Req() req, @Res() res) {
-    return this.documentRouteService.deleteDocumentRouteById(req, res);
+  deleteDocumentRouteById(@Param() param, @Res() res) {
+    return this.documentRouteService.deleteDocumentRouteById(param, res);
   }
 }

@@ -11,16 +11,13 @@ export class ReportService {
     private readonly documentRepository: typeof Document,
   ) {}
 
-  async getAllDocumentsInfo(req, res) {
+  async getAllDocumentsInfo(body, res) {
     try {
       const documents = await this.documentRepository.findAll({
         attributes: ['officeName', 'officeId', 'statusId', 'dateApplication'],
         where: {
           dateApplication: {
-            [Op.between]: [
-              new Date(req.body.startDate),
-              new Date(req.body.endDate),
-            ],
+            [Op.between]: [new Date(body.startDate), new Date(body.endDate)],
           },
           flagDeleted: {
             [Op.not]: true,

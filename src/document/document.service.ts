@@ -531,7 +531,7 @@ export class DocumentService {
     }
   }
 
-  async updateDocumentFlagDeleted(body, param, req, res) {
+  async updateDocumentFlagDeleted(body, param, res) {
     try {
       const document = await this.documentRepository.findByPk(
         param.documentId,

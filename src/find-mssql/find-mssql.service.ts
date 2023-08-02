@@ -16,7 +16,7 @@ export class FindMssqlService {
     private readonly t_XXHR_SCHEDULE_BRIGADES_V: typeof T_XXHR_SCHEDULE_BRIGADES,
   ) {}
 
-  async getAllSchedule(req, res) {
+  async getAllSchedule(query, res) {
     try {
       const { Op } = require('sequelize');
 
@@ -73,24 +73,22 @@ export class FindMssqlService {
           [Op.or]: [
             {
               POSITION_ID: {
-                [Op.like]: `%${req.query.position}%`,
+                [Op.like]: `%${query.position}%`,
               },
             },
             {
               POSITION_NAME: {
-                [Op.like]: `%${req.query.position}%`,
+                [Op.like]: `%${query.position}%`,
               },
             },
           ],
         },
-
         raw: true,
       });
 
       function removeDuplicatesFromArray(arr) {
         const uniqueSet = new Set();
         const result = [];
-
         for (const item of arr) {
           const serializedItem = JSON.stringify(item);
           if (!uniqueSet.has(serializedItem)) {
@@ -98,7 +96,6 @@ export class FindMssqlService {
             result.push(item);
           }
         }
-
         return result;
       }
 
@@ -112,9 +109,7 @@ export class FindMssqlService {
       function transformOrgData(arr) {
         return arr.map((item) => {
           if (item.ORG_NAME === item.PARENT_ORG_NAME) item.ORG_NAME = null;
-
           if (item.ORG_NAME === null) item.SECTOR = null;
-
           return item;
         });
       }
@@ -135,12 +130,12 @@ export class FindMssqlService {
     }
   }
 
-  async getAllBrigada(req, res) {
+  async getAllBrigada(query, res) {
     try {
       const results = await T_XXHR_WORK_SCHEDULES.findAll({
         where: {
           CODE: {
-            [Op.like]: `%${req.query.brigada}%`,
+            [Op.like]: `%${query.brigada}%`,
           },
         },
         attributes: ['WORK_SCHEDULE_ID', ['CODE', 'SCHEDULE'], 'NAME'],
@@ -154,13 +149,11 @@ export class FindMssqlService {
     }
   }
 
-  async getAllBrigades(req, res) {
-    console.log(req.query.brigades);
-
+  async getAllBrigades(query, res) {
     try {
       const brigades = await T_XXHR_SCHEDULE_BRIGADES.findAll({
         where: {
-          WORK_SCHEDULE_ID: req.query.brigades,
+          WORK_SCHEDULE_ID: query.brigades,
         },
         attributes: ['WORK_SCHEDULE_ID', 'BRIGADE'],
         raw: true,
