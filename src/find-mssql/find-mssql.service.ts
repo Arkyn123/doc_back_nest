@@ -6,7 +6,7 @@ import { T_XXHR_OSK_ORG_HIERARHY_V } from './T_XXHR_OSK_ORG_HIERARHY_V.model';
 import { T_XXHR_OSK_ASSIGNMENTS_V } from './T_XXHR_OSK_ASSIGNMENTS_V.model';
 import { T_XXHR_OSK_POSITIONS } from './T_XXHR_OSK_POSITIONS.model';
 import { databaseMSSQL } from '../databases/databaseMSSQL';
-import { Op, literal, col } from 'sequelize';
+import { Op, literal, col, fn } from 'sequelize';
 import { T_XXHR_WORK_SCHEDULES } from './T_XXHR_WORK_SCHEDULES.model';
 
 @Injectable()
@@ -18,22 +18,6 @@ export class FindMssqlService {
 
   async getAllSchedule(req, res) {
     try {
-      const [results, metadata] = await databaseMSSQL.query(`
-      select distinct
-      a.ORG_ID,
-      (select ORG_NAME from T_XXHR_OSK_ORG_HIERARHY_V where ORGANIZATION_ID = a.ORG_ID and DATE_TO > GETDATE() and TYPE != 02) as ORG_NAME,
-      c.PARENT_ORG_ID, 
-      c.PARENT_ORG_NAME, 
-      a.POSITION_ID, 
-      a.POSITION_NAME, 
-      b.TYPE_NAME,
-      (select distinct ORG_NAME from T_XXHR_OSK_ORG_HIERARHY_V where ORGANIZATION_ID = b.ORGANIZATION_ID_PARENT and DATE_TO > GETDATE() and b.TYPE != 02 and b.TYPE != 03) as SECTOR
-      from [T_XXHR_OSK_POSITIONS] a
-      join [T_XXHR_OSK_ORG_HIERARHY_V] b on a.ORG_ID=b.ORGANIZATION_ID
-      join [T_XXHR_OSK_ASSIGNMENTS_V] c on a.ORG_ID=c.ORG_ID
-      where (b.DATE_TO > GETDATE()) and (a.POSITION_ID like '%${req.query.position}%' or a.POSITION_NAME like '%${req.query.position}%') 
-`);
-
       const { Op } = require('sequelize');
 
       let positions = await T_XXHR_OSK_POSITIONS.findAll({
@@ -50,6 +34,7 @@ export class FindMssqlService {
             'SECTOR',
           ],
         ],
+
         include: [
           {
             model: T_XXHR_OSK_ASSIGNMENTS_V,
@@ -63,12 +48,6 @@ export class FindMssqlService {
             attributes: [],
             on: {
               ORGANIZATION_ID: { [Op.col]: 'T_XXHR_OSK_POSITIONS.ORG_ID' },
-              DATE_TO: {
-                [Op.gt]: Date.now(),
-              },
-              TYPE: {
-                [Op.ne]: '02',
-              },
             },
             include: [
               {
@@ -79,8 +58,11 @@ export class FindMssqlService {
                     [Op.col]:
                       'T_XXHR_OSK_ORG_HIERARHY_V.ORGANIZATION_ID_PARENT',
                   },
+                  DATE_TO: {
+                    [Op.gt]: Date.now(),
+                  },
                   TYPE: {
-                    [Op.ne]: '03',
+                    [Op.ne]: '02',
                   },
                 },
               },
@@ -100,23 +82,50 @@ export class FindMssqlService {
               },
             },
           ],
-          [Op.and]: literal('(T_XXHR_OSK_ORG_HIERARHY_V.DATE_TO > GETDATE())'),
         },
+
         raw: true,
       });
 
       function removeDuplicatesFromArray(arr) {
+        const uniqueSet = new Set();
+        const result = [];
+
+        for (const item of arr) {
+          const serializedItem = JSON.stringify(item);
+          if (!uniqueSet.has(serializedItem)) {
+            uniqueSet.add(serializedItem);
+            result.push(item);
+          }
+        }
+
+        return result;
+      }
+
+      function removeObjectsWithNullParent(arr) {
         return arr.filter(
-          (item, index) =>
-            arr.findIndex(
-              (elem) => JSON.stringify(elem) === JSON.stringify(item),
-            ) === index,
+          (item) =>
+            item.PARENT_ORG_ID !== null && item.PARENT_ORG_NAME !== null,
         );
+      }
+
+      function transformOrgData(arr) {
+        return arr.map((item) => {
+          if (item.ORG_NAME === item.PARENT_ORG_NAME) item.ORG_NAME = null;
+
+          if (item.ORG_NAME === null) item.SECTOR = null;
+
+          return item;
+        });
       }
 
       return res
         .status(errors.success.code)
-        .json(removeDuplicatesFromArray(positions));
+        .json(
+          transformOrgData(
+            removeObjectsWithNullParent(removeDuplicatesFromArray(positions)),
+          ),
+        );
     } catch (e) {
       console.warn(e.message);
       if (e?.original['errors']?.length)
