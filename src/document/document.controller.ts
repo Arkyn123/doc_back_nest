@@ -7,7 +7,11 @@ import {
   UseGuards,
   Res,
   Req,
+  Query,
+  Body,
+  Param,
 } from '@nestjs/common';
+import { User, Filter } from 'src/utils/custom.decorators';
 import { DocumentService } from './document.service';
 import { DocumentDTO } from './dto/DocumentDTO';
 import { UpdateDocumentDTO } from './dto/updateDocumentDTO';
@@ -19,50 +23,89 @@ export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
   @Get()
-  getAllDocuments(@Req() req, @Res() res) {
-    return this.documentService.getAllDocument(req, res);
+  getAllDocuments(@Filter() filter, @User() user, @Query() query, @Res() res) {
+    return this.documentService.getAllDocument(filter, query, user, res);
   }
 
   @Get('/:documentId')
-  getDocumentById(@Req() req, @Res() res) {
-    return this.documentService.getDocumentById(req, res);
+  getDocumentById(@Param() param, @Req() req, @Res() res) {
+    return this.documentService.getDocumentById(param, res);
   }
 
   @Post('/add')
-  addNewDocument(@Req() req, @Res() res) {
-    return this.documentService.addNewDocument(req, res);
+  addNewDocument(@User() user, @Body() body, @Res() res) {
+    return this.documentService.addNewDocument(user, body, res);
   }
 
   @Post('/addInDraft')
-  addNewDocumentInDraft(@Req() req, @Res() res) {
-    return this.documentService.addNewDocumentInDraft(req, res);
+  addNewDocumentInDraft(@User() user, @Body() body, @Res() res) {
+    return this.documentService.addNewDocumentInDraft(user, body, res);
   }
 
   @UseGuards(PermGuard)
   @Put('/update/:documentId')
-  async updateDocumentByDocumentId(@Req() req, @Res() res) {
-    return this.documentService.updateDocumentByDocumentId(req, res);
+  async updateDocumentByDocumentId(
+    @User() user,
+    @Param() param,
+    @Body() body,
+    @Res() res,
+  ) {
+    return this.documentService.updateDocumentByDocumentId(
+      user,
+      param,
+      body,
+      res,
+    );
   }
 
   @UseGuards(PermGuard)
   @Put('/updateFromDraftAndRevision/:documentId')
-  updateDocumentFromDraftAndRevisionByDocumentId(@Req() req, @Res() res) {
+  updateDocumentFromDraftAndRevisionByDocumentId(
+    @User() user,
+    @Param() param,
+    @Body() body,
+
+    @Res() res,
+  ) {
     return this.documentService.updateDocumentFromDraftAndRevisionByDocumentId(
-      req,
+      user,
+      param,
+      body,
       res,
     );
   }
 
   @UseGuards(PermGuard)
   @Put('/updateInfoForRole/:documentId')
-  updateInfoForRole(@Req() req, @Res() res) {
-    return this.documentService.updateDocumentInfoForRole(req, res);
+  updateInfoForRole(
+    @User() user,
+    @Param() param,
+    @Body() body,
+
+    @Res() res,
+  ) {
+    return this.documentService.updateDocumentInfoForRole(
+      user,
+      param,
+      body,
+      res,
+    );
   }
 
   @UseGuards(PermGuard)
   @Put('/updateDocumentFlagDeleted/:documentId')
-  updateDocumentFlagDeleted(@Req() req, @Res() res) {
-    return this.documentService.updateDocumentFlagDeleted(req, res);
+  updateDocumentFlagDeleted(
+    @Param() param,
+    @Body() body,
+    @Req() req,
+    @Res() res,
+  ) {
+    return this.documentService.updateDocumentFlagDeleted(
+      param,
+      body,
+      req,
+      res,
+    );
   }
 
   @Delete('/delete')

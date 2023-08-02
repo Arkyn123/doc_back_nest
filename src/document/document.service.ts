@@ -26,10 +26,8 @@ export class DocumentService {
     private readonly documentOrderLogRepository: typeof DocumentOrderLog,
   ) {}
 
-  async getAllDocument(req, res) {
+  async getAllDocument(filter, query, user, res) {
     try {
-      const filter = { ...req.filter };
-
       filter.where = {
         ...filter.where,
         flagDeleted: {
@@ -37,36 +35,36 @@ export class DocumentService {
         },
       };
 
-      if (req.query.officeId)
+      if (query.officeId)
         filter.where.officeId = {
-          [Op.eq]: req.query.officeId,
+          [Op.eq]: query.officeId,
         };
 
-      if (req.query.fullname)
+      if (query.fullname)
         filter.where.usernames = {
-          [Op.iLike]: `%${req.query.fullname}%`,
+          [Op.iLike]: `%${query.fullname}%`,
         };
 
-      if (req.query.authorFullname) {
-        const fieldKey = /\d/.test(req.query.authorFullname)
+      if (query.authorFullname) {
+        const fieldKey = /\d/.test(query.authorFullname)
           ? 'registrationNumber'
           : 'authorFullname';
 
         filter.where[fieldKey] = {
-          [Op.iLike]: `%${req.query.authorFullname}%`,
+          [Op.iLike]: `%${query.authorFullname}%`,
         };
       }
 
-      if (req.query.myDocumentsFlag && req.query.myDocumentsFlag === 'true') {
-        const ids = req.user.roles.map((r) => r.idOffice);
-        ids.push(req.user.officeId);
+      if (query.myDocumentsFlag && query.myDocumentsFlag === 'true') {
+        const ids = user.roles.map((r) => r.idOffice);
+        ids.push(user.officeId);
 
         filter.where.officeId = {
           [Op.in]: ids,
         };
 
         filter.where.permitionCurrent = {
-          [Op.in]: req.user.roles.map((r) => r.idAccessCode),
+          [Op.in]: user.roles.map((r) => r.idAccessCode),
         };
 
         filter.where.statusId = {
@@ -74,13 +72,13 @@ export class DocumentService {
         };
       }
 
-      if (req.query.modelDate) {
-        if (req.query.modelDate.length === 10) {
+      if (query.modelDate) {
+        if (query.modelDate.length === 10) {
           filter.where.dateApplication = {
-            [Op.eq]: new Date(req.query.modelDate),
+            [Op.eq]: new Date(query.modelDate),
           };
         } else {
-          const modelDate = JSON.parse(req.query.modelDate);
+          const modelDate = JSON.parse(query.modelDate);
           filter.where.dateApplication = {
             [Op.gte]: new Date(modelDate.from),
             [Op.lte]: new Date(modelDate.to),
@@ -88,7 +86,7 @@ export class DocumentService {
         }
       }
 
-      const isSecretary = req.user.roles.some((r) =>
+      const isSecretary = user.roles.some((r) =>
         [
           'SDM_SECRETARY_CHECK',
           'SDM_SECRETARY_REGISTRATION',
@@ -97,29 +95,31 @@ export class DocumentService {
         ].includes(r.idAccessCode),
       );
 
-      const usersFromArm = await fetch(
-        'http://10.11.62.74/uemi_new/frontend/web/index.php?r=api/personnel/get-functional-submission',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${req.token}`,
-          },
-          body: JSON.stringify({
-            employee_number: `${req.user.id}`,
-          }),
-        },
-      ).then((response) => response.json());
+      const usersFromArm = Object.keys(
+        await (
+          await fetch(
+            'http://10.11.62.74/uemi_new/frontend/web/index.php?r=api/personnel/get-functional-submission',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${user.token}`,
+              },
+              body: JSON.stringify({
+                employee_number: `${user.id}`,
+              }),
+            },
+          )
+        ).json(),
+      ).map((x) => Number(x));
 
-      const isAdmin = req.user.roles.some(
-        (r) => r.idAccessCode === 'UEMI_ADMIN',
-      );
+      const isAdmin = user.roles.some((r) => r.idAccessCode === 'UEMI_ADMIN');
 
-      if (!isAdmin && isSecretary && !req.query.officeId) {
-        const arr = req.user.roles
+      if (!isAdmin && isSecretary && !query.officeId) {
+        const arr = user.roles
           .filter((x) => x.idAccessCode.includes('SDM'))
           .map((l) => l.idOffice);
-        arr.push(req.user.officeId);
+        arr.push(user.officeId);
         const newArr = arr.filter((item, pos) => arr.indexOf(item) === pos);
         filter.where.officeId = {
           [Op.in]: newArr,
@@ -128,11 +128,11 @@ export class DocumentService {
 
       if (!isAdmin && !isSecretary) {
         filter.where.authorPersonalNumber = {
-          [Op.eq]: req.user.id,
+          [Op.eq]: user.id,
         };
 
         filter.where[Op.or] = [
-          { authorPersonalNumber: req.user.id },
+          { authorPersonalNumber: user.id },
           {
             users: {
               [Op.or]: usersFromArm.map((en) => ({
@@ -156,9 +156,9 @@ export class DocumentService {
     }
   }
 
-  async getDocumentById(req, res) {
+  async getDocumentById(param, res) {
     try {
-      const documentId = req.params.documentId;
+      const documentId = param.documentId;
       const document = await this.documentRepository.findByPk(documentId, {
         include: { all: true, nested: true },
       });
@@ -183,23 +183,18 @@ export class DocumentService {
     }
   }
 
-  async addNewDocument(req, res) {
+  async addNewDocument(user, body, res) {
     try {
-      const { documentType, body, dateApplication, documentTemplateID, users } =
-        req.body;
-
-      const { id: userId, fullname, officeName, officeId } = req.user;
-
       const [route, type] = await Promise.all([
         this.documentRouteRepository.findOne({
           where: {
             orderId: 1,
-            documentType,
+            documentType: body.documentType,
           },
         }),
         this.documentTypeRepository.findOne({
           where: {
-            id: documentType,
+            id: body.documentType,
           },
         }),
       ]);
@@ -216,24 +211,22 @@ export class DocumentService {
           .json({ message: 'Тип документа не найден' });
       }
 
-      const usernames = users.map((u) => u.fullname).join();
-
       const document = await this.documentRepository.create({
-        body,
+        body: body.body,
         documentType: type.id,
         documentTypeDescription: type.description,
-        authorPersonalNumber: userId,
-        authorFullname: fullname,
-        dateApplication,
+        authorPersonalNumber: user.userId,
+        authorFullname: user.fullname,
+        dateApplication: body.dateApplication,
         statusId: 3,
         order: 1,
         permitionCurrent: route.permition,
         permitionCurrentDesc: route.description,
-        documentTemplateID,
-        users,
-        usernames,
-        officeName,
-        officeId,
+        documentTemplateID: body.documentTemplateID,
+        users: body.users,
+        usernames: body.users.map((u) => u.fullname).join(),
+        officeName: body.officeName,
+        officeId: body.officeId,
       });
 
       return res.status(errors.success.code).json(document);
@@ -246,24 +239,19 @@ export class DocumentService {
     }
   }
 
-  async addNewDocumentInDraft(req, res) {
+  async addNewDocumentInDraft(user, body, res) {
     try {
-      const { documentType, body, dateApplication, documentTemplateID, users } =
-        req.body;
-
-      const { id: userId, fullname, officeName, officeId } = req.user;
-
       const [route, type] = await Promise.all([
         this.documentRouteRepository.findOne({
           where: {
             orderId: 1,
-            documentType,
+            documentType: body.documentType,
           },
         }),
 
         this.documentTypeRepository.findOne({
           where: {
-            id: documentType,
+            id: body.documentType,
           },
         }),
       ]);
@@ -271,21 +259,23 @@ export class DocumentService {
       if (!route || !type) return res.sendStatus(errors.notFound.code);
 
       const document = await this.documentRepository.create({
-        body,
+        body: body.body,
         documentType: type.id,
         documentTypeDescription: type.description,
-        authorPersonalNumber: userId,
-        authorFullname: fullname,
-        dateApplication,
+        authorPersonalNumber: user.id,
+        authorFullname: user.fullname,
+        dateApplication: body.dateApplication,
         statusId: 1,
         order: 1,
-        permitionCurrent: route.permition,
-        permitionCurrentDesc: route.description,
-        documentTemplateID,
-        users,
-        usernames: users ? users.map((u) => u.fullname).join(' ') : '',
-        officeName,
-        officeId,
+        permitionCurrent: route.dataValues.permition,
+        permitionCurrentDesc: route.dataValues.description,
+        documentTemplateID: body.documentTemplateID,
+        users: body.users,
+        usernames: body.users
+          ? body.users.map((u) => u.fullname).join(' ')
+          : '',
+        officeName: body.officeName,
+        officeId: body.officeId,
       });
 
       const routeNext = await this.documentRouteRepository.findOne({
@@ -300,8 +290,8 @@ export class DocumentService {
         order: document.order,
         orderDescription: routeNext.description,
         statusDescription: 'Черновик',
-        personalNumber: userId,
-        fullname,
+        personalNumber: user.id,
+        fullname: user.fullname,
       };
 
       await this.documentOrderLogRepository.bulkCreate([documentOrderLogData]);
@@ -316,10 +306,10 @@ export class DocumentService {
     }
   }
 
-  async updateDocumentByDocumentId(req, res) {
+  async updateDocumentByDocumentId(user, body, param, res) {
     try {
       const document = await this.documentRepository.findByPk(
-        req.params.documentId,
+        param.documentId,
         {
           include: [{ all: true, nested: true, duplicating: true }],
         },
@@ -331,11 +321,11 @@ export class DocumentService {
           .json({ message: 'Не найден документ' });
 
       await document.update({
-        dateApplication: req.body.dateApplication,
-        body: req.body.updatedDocument,
-        users: req.body.users,
-        officeName: req.user.officeName,
-        officeId: req.user.officeId,
+        dateApplication: body.dateApplication,
+        body: body.updatedDocument,
+        users: body.users,
+        officeName: user.officeName,
+        officeId: user.officeId,
       });
 
       const route = await this.documentRouteRepository.findOne({
@@ -352,13 +342,13 @@ export class DocumentService {
           .send('Не найден DocumentRoute');
 
       let routeNext;
-      if (!req.user.roles.map((r) => r.idAccessCode).includes(route.permition))
+      if (!user.roles.map((r) => r.idAccessCode).includes(route.permition))
         return res.sendStatus(errors.forbidden.code);
 
-      if (document.statusId == 3 && req.body.agree) {
+      if (document.statusId == 3 && body.agree) {
         if (document.order == 3) {
           await document.update({
-            registrationNumber: req.body.registrationNumber,
+            registrationNumber: body.registrationNumber,
           });
         }
 
@@ -387,7 +377,7 @@ export class DocumentService {
 
           if (!routeNext) return res.sendStatus(errors.notFound.code);
         }
-      } else if (document.statusId == 3 && !req.body.agree) {
+      } else if (document.statusId == 3 && !body.agree) {
         routeNext = await this.documentRouteRepository.findOne({
           where: {
             orderId: 1,
@@ -402,16 +392,16 @@ export class DocumentService {
           order: 1,
           permitionCurrent: routeNext.permition,
           permitionCurrentDesc: routeNext.description,
-          message: req.body.message,
-          messageUserId: req.user.id,
-          messageUserFullname: req.user.fullname,
+          message: body.message,
+          messageUserId: user.id,
+          messageUserFullname: user.fullname,
         });
       }
 
       if (!routeNext) return res.sendStatus(errors.notFound.code);
 
       const documentNew = await this.documentRepository.findByPk(
-        req.params.documentId,
+        param.documentId,
         {
           include: [{ all: true, nested: true, duplicating: true }],
         },
@@ -422,10 +412,10 @@ export class DocumentService {
         order: documentNew.order,
         orderDescription: routeNext.description,
         statusDescription: documentNew.status.description,
-        personalNumber: req.user.id,
-        fullname: req.user.fullname,
-        message: req.body.message,
-        registrationNumber: req.body.registrationNumber,
+        personalNumber: user.id,
+        fullname: user.fullname,
+        message: body.message,
+        registrationNumber: body.registrationNumber,
       });
 
       return res.status(errors.success.code).json(document);
@@ -435,10 +425,10 @@ export class DocumentService {
     }
   }
 
-  async updateDocumentInfoForRole(req, res) {
+  async updateDocumentInfoForRole(user, param, body, res) {
     try {
       const document = await this.documentRepository.findByPk(
-        req.params.documentId,
+        param.documentId,
         {
           include: [{ all: true, nested: true, duplicating: true }],
         },
@@ -447,11 +437,11 @@ export class DocumentService {
       if (!document) return res.sendStatus(errors.notFound.code);
 
       await document.update({
-        dateApplication: req.body.dateApplication,
-        body: req.body.updatedDocument,
-        users: req.body.users,
-        officeName: req.user.officeName,
-        officeId: req.user.officeId,
+        dateApplication: body.dateApplication,
+        body: body.updatedDocument,
+        users: body.users,
+        officeName: user.officeName,
+        officeId: user.officeId,
       });
 
       return res.status(errors.success.code).json(document);
@@ -461,10 +451,10 @@ export class DocumentService {
     }
   }
 
-  async updateDocumentFromDraftAndRevisionByDocumentId(req, res) {
+  async updateDocumentFromDraftAndRevisionByDocumentId(user, body, param, res) {
     try {
       const document = await this.documentRepository.findByPk(
-        req.params.documentId,
+        param.documentId,
         {
           include: [{ all: true, nested: true, duplicating: true }],
         },
@@ -475,32 +465,29 @@ export class DocumentService {
       const route = await this.documentRouteRepository.findOne({
         where: {
           orderId: 1,
-          documentType: req.body.documentType,
+          documentType: body.documentType,
         },
       });
 
       if (!route) return res.sendStatus(errors.notFound.code);
 
-      if (
-        req.user.id == document.authorPersonalNumber &&
-        !req.body.flagUpdateDraft
-      ) {
+      if (user.id == document.authorPersonalNumber && !body.flagUpdateDraft) {
         await document.update({
-          body: req.body.updatedDocument,
+          body: body.updatedDocument,
           statusId: 3,
           order: 1,
           permitionCurrent: route.permition,
           permitionCurrentDesc: route.description,
-          dateApplication: req.body.dateApplication,
-          documentTemplateID: req.body.documentTemplateID,
-          users: req.body.users,
-          officeName: req.user.officeName,
-          officeId: req.user.officeId,
-          documentType: req.body.documentType,
+          dateApplication: body.dateApplication,
+          documentTemplateID: body.documentTemplateID,
+          users: body.users,
+          officeName: user.officeName,
+          officeId: user.officeId,
+          documentType: body.documentType,
         });
 
         const documentUpdated = await this.documentRepository.findByPk(
-          req.params.documentId,
+          param.documentId,
           {
             include: [{ all: true, nested: true, duplicating: true }],
           },
@@ -518,22 +505,22 @@ export class DocumentService {
           order: documentUpdated.order,
           orderDescription: routeNext.description,
           statusDescription: documentUpdated.status.description,
-          personalNumber: req.user.id,
-          fullname: req.user.fullname,
+          personalNumber: user.id,
+          fullname: user.fullname,
         });
       }
 
-      if (req.body.flagUpdateDraft) {
+      if (body.flagUpdateDraft) {
         await document.update({
-          body: req.body.updatedDocument,
+          body: body.updatedDocument,
           permitionCurrent: route.permition,
           permitionCurrentDesc: route.description,
-          dateApplication: req.body.dateApplication,
-          documentTemplateID: req.body.documentTemplateID,
-          users: req.body.users,
-          officeName: req.user.officeName,
-          officeId: req.user.officeId,
-          documentType: req.body.documentType,
+          dateApplication: body.dateApplication,
+          documentTemplateID: body.documentTemplateID,
+          users: body.users,
+          officeName: user.officeName,
+          officeId: user.officeId,
+          documentType: body.documentType,
         });
       }
 
@@ -544,10 +531,10 @@ export class DocumentService {
     }
   }
 
-  async updateDocumentFlagDeleted(req, res) {
+  async updateDocumentFlagDeleted(body, param, req, res) {
     try {
       const document = await this.documentRepository.findByPk(
-        req.params.documentId,
+        param.documentId,
         {
           include: [{ all: true, nested: true, duplicating: true }],
         },
@@ -556,11 +543,11 @@ export class DocumentService {
       if (!document) return res.sendStatus(errors.notFound.code);
 
       await document.update({
-        dateApplication: req.body.dateApplication,
+        dateApplication: body.dateApplication,
         deletedDate: new Date(Date.now()),
         flagDeleted: true,
-        deletedAuthorFullname: req.body.deletedAuthorFullname,
-        deletedAuthorPersonalNumber: req.body.deletedAuthorPersonalNumber,
+        deletedAuthorFullname: body.deletedAuthorFullname,
+        deletedAuthorPersonalNumber: body.deletedAuthorPersonalNumber,
       });
 
       return res.status(errors.success.code).json(document);
