@@ -16,7 +16,7 @@ import { FindMssqlModule } from './find-mssql/find-mssql.module';
 import { DicOfficeModule } from './dicOffice/dicOffice.module';
 import { DicOfficeCorrespondenceModule } from './dicOfficeCorrespondence/dicOfficeCorrespondence.module';
 
-import { setPermissions } from './middleware/SetPermissionsMiddleware';
+import { SetPermissions } from './middleware/SetPermissionsMiddleware';
 import { SequelizeFiltering } from './middleware/SequelizeFilteringMiddleware';
 import { databasePgModule } from './databases/databasePG.module';
 import { databaseMssqlModule } from './databases/databaseMssql.module';
@@ -43,9 +43,9 @@ import { DocumentOrderLogModule } from './documentOrderLog/documentOrderLog.modu
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(setPermissions).forRoutes(...setPermissionsPaths);
+    consumer.apply(SetPermissions).forRoutes(...setPermissionsPaths);
     consumer
-      .apply(setPermissions, SequelizeFiltering)
+      .apply(SetPermissions, SequelizeFiltering)
       .forRoutes(...setPermissionsPathsPlusSequelizeFiltering);
   }
 }

@@ -19,7 +19,7 @@ export class SequelizeFiltering implements NestMiddleware {
     });
   }
 
-  async use(req: Request, next: NextFunction) {
+  async use(req: Request, res: Response, next: NextFunction) {
     try {
       if (
         Object.keys(req.body).length === 0 &&

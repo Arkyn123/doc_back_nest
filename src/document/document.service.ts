@@ -149,7 +149,7 @@ export class DocumentService {
         limit: 100,
       });
 
-      return res.status(errors.success.code).json(documents);
+      return res.json(documents);
     } catch (e) {
       console.warn(e);
       return res.sendStatus(errors.internalServerError.code);

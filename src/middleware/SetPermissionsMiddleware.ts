@@ -6,7 +6,7 @@ import setRolesToRequest from './SetPermissionsFunctions/setRolesToRequest';
 import checkPermissions from './SetPermissionsFunctions/checkPermissions';
 
 @Injectable()
-export class setPermissions implements NestMiddleware {
+export class SetPermissions implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     await setWantedPermission(req);
     await setUserToRequest(req, res);
