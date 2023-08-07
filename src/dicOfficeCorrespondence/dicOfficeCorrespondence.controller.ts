@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Put, Res } from '@nestjs/common';
 import { DicOfficeCorrespondenceService } from './dicOfficeCorrespondence.service';
-import { Filter } from 'src/utils/custom.decorators';
+import { Filter } from 'src/utils/customDecorators';
 
 @Controller('dicOfficeCorrespondence')
 export class DicOfficeCorrespondenceController {

@@ -8,7 +8,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { DocumentRouteService } from './documentRoute.service';
-import { User } from 'src/utils/custom.decorators';
+import { User } from 'src/utils/customDecorators';
 
 @Controller('documentRoute')
 export class DocumentRouteController {

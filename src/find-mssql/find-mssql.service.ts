@@ -5,7 +5,6 @@ import { T_XXHR_SCHEDULE_BRIGADES } from './T_XXHR_SCHEDULE_BRIGADES.model';
 import { T_XXHR_OSK_ORG_HIERARHY_V } from './T_XXHR_OSK_ORG_HIERARHY_V.model';
 import { T_XXHR_OSK_ASSIGNMENTS_V } from './T_XXHR_OSK_ASSIGNMENTS_V.model';
 import { T_XXHR_OSK_POSITIONS } from './T_XXHR_OSK_POSITIONS.model';
-import { databaseMSSQL } from '../databases/databaseMSSQL';
 import { Op, literal, col, fn } from 'sequelize';
 import { T_XXHR_WORK_SCHEDULES } from './T_XXHR_WORK_SCHEDULES.model';
 

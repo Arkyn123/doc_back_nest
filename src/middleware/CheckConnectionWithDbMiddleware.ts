@@ -27,7 +27,7 @@ export class CheckConnectionWithDB implements NestMiddleware {
     } catch (err) {
       console.log('Server cannot connect to the database');
     }
-    
+
     next();
   }
 }

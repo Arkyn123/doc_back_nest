@@ -2,7 +2,6 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Request, Response } from 'express';
 import { Document } from '../document/document.model';
-import errors from 'src/utils/errors';
 
 @Injectable()
 export class PermGuard implements CanActivate {
@@ -27,57 +26,44 @@ export class PermGuard implements CanActivate {
     // if (userRoles.some((item) => item.idAccessCode === 'admin'))
     //   return true;
 
-    if (req['permissions'].authenticated) {
-      const { roleWanted, fieldWanted, rolePassed, field } = req['permissions'];
+    if (!req['permissions'].authenticated) {
+      return true;
+    }
 
-      if (!roleWanted && !fieldWanted) {
-        return true;
-      }
+    const { roleWanted, fieldWanted, rolePassed, field } = req['permissions'];
 
-      if (roleWanted && rolePassed) {
-        if (fieldWanted || req['permissions'].officeCheckWanted) {
-          const userField = field[0];
-          const fieldValue = req['user'][userField];
-          const object = await this.documentRepository.findByPk(documentId);
+    if (!roleWanted && !fieldWanted) {
+      return true;
+    }
 
-          if (
-            (object['_options'].attributes.includes(userField) &&
-              object[userField] === fieldValue) ||
-            userRoles.some((r) => r.idOffice === object.officeId)
-          ) {
-            return true;
-          }
-
-          if (!object['_options'].attributes.includes(userField)) {
-            return true;
-          }
-
-          return false;
-        }
-
-        return true;
-      }
-
-      if (fieldWanted) {
+    if (roleWanted && rolePassed) {
+      if (fieldWanted || req['permissions'].officeCheckWanted) {
         const userField = field[0];
         const fieldValue = req['user'][userField];
         const object = await this.documentRepository.findByPk(documentId);
 
-        if (
-          object['_options'].attributes.includes(userField) &&
-          object[userField] === fieldValue
-        ) {
-          return true;
-        }
-
-        if (!object['_options'].attributes.includes(userField)) {
-          return true;
-        }
+        return (
+          (object['_options'].attributes.includes(userField) &&
+            object[userField] === fieldValue) ||
+          userRoles.some((r) => r.idOffice === object.officeId) ||
+          !object['_options'].attributes.includes(userField)
+        );
       }
 
-      return false;
-    } else {
       return true;
     }
+
+    if (fieldWanted) {
+      const userField = field[0];
+      const fieldValue = req['user'][userField];
+      const object = await this.documentRepository.findByPk(documentId);
+
+      return (
+        !object['_options'].attributes.includes(userField) ||
+        object[userField] === fieldValue
+      );
+    }
+
+    return false;
   }
 }

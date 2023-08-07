@@ -11,7 +11,7 @@ import {
   Body,
   Param,
 } from '@nestjs/common';
-import { User, Filter } from 'src/utils/custom.decorators';
+import { User, Filter } from 'src/utils/customDecorators';
 import { DocumentService } from './document.service';
 import { DocumentDTO } from './dto/DocumentDTO';
 import { UpdateDocumentDTO } from './dto/updateDocumentDTO';

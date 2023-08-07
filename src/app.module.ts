@@ -16,7 +16,7 @@ import { FindMssqlModule } from './find-mssql/find-mssql.module';
 import { DicOfficeModule } from './dicOffice/dicOffice.module';
 import { DicOfficeCorrespondenceModule } from './dicOfficeCorrespondence/dicOfficeCorrespondence.module';
 
-import { setPermissions } from './middleware/SetPermissions';
+import { setPermissions } from './middleware/SetPermissionsMiddleware';
 import { SequelizeFiltering } from './middleware/SequelizeFilteringMiddleware';
 import { databasePgModule } from './databases/databasePG.module';
 import { databaseMssqlModule } from './databases/databaseMssql.module';

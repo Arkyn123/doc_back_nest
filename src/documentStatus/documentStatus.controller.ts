@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Res } from '@nestjs/common';
 import { DocumentStatusService } from './documentStatus.service';
-import { User } from 'src/utils/custom.decorators';
+import { User } from 'src/utils/customDecorators';
 
 @Controller('documentStatus')
 export class DocumentStatusController {

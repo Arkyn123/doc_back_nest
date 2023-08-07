@@ -156,4 +156,5 @@ export class Document extends Model<Document> {
 
   @HasMany(() => DocumentOrderLog, 'documentId')
   documentOrderLog: DocumentOrderLog[];
+  private _options: any;
 }

@@ -19,7 +19,7 @@ export class SequelizeFiltering implements NestMiddleware {
     });
   }
 
-  async use(req: Request, res: Response, next: NextFunction) {
+  async use(req: Request, next: NextFunction) {
     try {
       if (
         Object.keys(req.body).length === 0 &&
@@ -33,22 +33,27 @@ export class SequelizeFiltering implements NestMiddleware {
             typeof req[method].filter === 'string'
               ? JSON.parse(req[method].filter)
               : req[method].filter,
+
           order:
             typeof req[method].order === 'string'
               ? JSON.parse(req[method].order)
               : req[method].order,
+
           limit:
             typeof req[method].limit === 'string'
               ? JSON.parse(req[method].limit)
               : req[method].limit,
+
           offset:
             typeof req[method].offset === 'string'
               ? JSON.parse(req[method].offset)
               : req[method].offset,
         };
+
         const search = new SearchBuilder(this.sequelize, request)
           .setConfig({ 'default-limit': false })
           .getFullQuery();
+
         const filter = Object.fromEntries(
           Object.entries(search).filter(
             ([_, v]) => v !== null && v !== undefined,
